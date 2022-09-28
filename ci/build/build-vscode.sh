@@ -80,6 +80,11 @@ main() {
     "linkProtectionTrustedDomains": [
       "https://open-vsx.org"
     ],
+    "extensionsGallery": {
+      "serviceUrl": "https://open-vsx.org/vscode/gallery",
+      "itemUrl": "https://open-vsx.org/vscode/item",
+      "resourceUrlTemplate": "https://openvsxorg.blob.core.windows.net/resources/{publisher}/{name}/{version}/{path}"
+	  },
     "aiConfig": {
       "ariaKey": "code-server"
     }
