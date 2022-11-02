@@ -84,10 +84,10 @@ main() {
       "https://open-vsx.org"
     ],
     "extensionsGallery": {
-      "serviceUrl": "https://open-vsx.org/vscode/gallery",
-      "itemUrl": "https://open-vsx.org/vscode/item",
-      "resourceUrlTemplate": "https://openvsxorg.blob.core.windows.net/resources/{publisher}/{name}/{version}/{path}"
-	  },
+        "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
+        "cacheUrl": "https://vscode.blob.core.windows.net/gallery/index",
+        "itemUrl": "https://marketplace.visualstudio.com/items"
+    },
     "aiConfig": {
       "ariaKey": "code-server"
     }
