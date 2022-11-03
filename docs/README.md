@@ -1,4 +1,4 @@
-# A forked vscode version from the code-server repo.
+# A forked vscode version from the code-server repo
 
 Install 
 ```bash
