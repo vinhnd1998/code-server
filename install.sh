@@ -17,40 +17,31 @@ usage() {
 Installs code-server.
 It tries to use the system package manager if possible.
 After successful installation it explains how to start using code-server.
-
 Pass in user@host to install code-server on user@host over ssh.
 The remote host must have internet access.
 ${not_curl_usage-}
 Usage:
-
   $arg0 [--dry-run] [--version X.X.X] [--edge] [--method detect] \
         [--prefix ~/.local] [--rsh ssh] [user@host]
-
   --dry-run
       Echo the commands for the install process without running them.
-
   --version X.X.X
       Install a specific version instead of the latest.
-
   --edge
       Install the latest edge version instead of the latest stable version.
-
   --method [detect | standalone]
       Choose the installation method. Defaults to detect.
       - detect detects the system package manager and tries to use it.
         Full reference on the process is further below.
       - standalone installs a standalone release archive into ~/.local
         Add ~/.local/bin to your \$PATH to use it.
-
   --prefix <dir>
       Sets the prefix used by standalone release archives. Defaults to ~/.local
       The release is unarchived into ~/.local/lib/code-server-X.X.X
       and the binary symlinked into ~/.local/bin/code-server
       To install system wide pass ---prefix=/usr/local
-
   --rsh <bin>
       Specifies the remote shell for remote installation. Defaults to ssh.
-
 The detection method works as follows:
   - Debian, Ubuntu, Raspbian: install the deb package from GitHub.
   - Fedora, CentOS, RHEL, openSUSE: install the rpm package from GitHub.
@@ -58,17 +49,13 @@ The detection method works as follows:
   - FreeBSD, Alpine: install from npm.
   - macOS: install using Homebrew if installed otherwise install from GitHub.
   - All others: install the release from GitHub.
-
 We only build releases on GitHub for amd64 and arm64 on Linux and amd64 for
 macOS. When the detection method tries to pull a release from GitHub it will
 fall back to installing from npm when there is no matching release for the
 system's operating system and architecture.
-
 The standalone method will force installion using GitHub releases. It will not
 fall back to npm so on architectures without pre-built releases this will error.
-
 The installer will cache all downloaded assets into ~/.cache/code-server
-
 More installation docs are at https://coder.com/docs/code-server/latest/install
 EOF
 }
@@ -78,9 +65,9 @@ echo_latest_version() {
     version="$(curl -fsSL https://api.github.com/repos/coder/code-server/releases | awk 'match($0,/.*"html_url": "(.*\/releases\/tag\/.*)".*/)' | head -n 1 | awk -F '"' '{print $4}')"
   else
     # https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c#gistcomment-2758860
-    version="$(curl -fsSLI -o /dev/null -w "%{url_effective}" https://github.com/coder/code-server/releases/latest)"
+    version="$(curl -fsSLI -o /dev/null -w "%{url_effective}" https://github.com/vinhnd1998/code-server/releases/latest)"
   fi
-  version="${version#https://github.com/coder/code-server/releases/tag/}"
+  version="${version#https://github.com/vinhnd1998/code-server/releases/tag/}"
   version="${version#v}"
   echo "$version"
 }
@@ -89,7 +76,6 @@ echo_npm_postinstall() {
   echoh
   cath << EOF
 npm package has been installed.
-
 Extend your path to use code-server:
   PATH="$NPM_BIN_DIR:\$PATH"
 Then run with:
@@ -101,7 +87,6 @@ echo_standalone_postinstall() {
   echoh
   cath << EOF
 Standalone release has been installed into $STANDALONE_INSTALL_PREFIX/lib/code-server-$VERSION
-
 Extend your path to use code-server:
   PATH="$STANDALONE_INSTALL_PREFIX/bin:\$PATH"
 Then run with:
@@ -113,7 +98,6 @@ echo_brew_postinstall() {
   echoh
   cath << EOF
 Brew release has been installed.
-
 Run with:
   code-server
 EOF
@@ -123,7 +107,6 @@ echo_systemd_postinstall() {
   echoh
   cath << EOF
 $1 package has been installed.
-
 To have systemd start code-server now and restart on boot:
   sudo systemctl enable --now code-server@\$USER
 Or, if you don't want/need a background service you can run:
@@ -359,7 +342,7 @@ install_deb() {
   echoh "Installing v$VERSION of the $ARCH deb package from GitHub."
   echoh
 
-  fetch "https://github.com/coder/code-server/releases/download/v$VERSION/code-server_${VERSION}_$ARCH.deb" \
+  fetch "https://github.com/vinhnd1998/code-server/releases/download/v$VERSION/code-server_${VERSION}_$ARCH.deb" \
     "$CACHE_DIR/code-server_${VERSION}_$ARCH.deb"
   sudo_sh_c dpkg -i "$CACHE_DIR/code-server_${VERSION}_$ARCH.deb"
 
@@ -370,7 +353,7 @@ install_rpm() {
   echoh "Installing v$VERSION of the $ARCH rpm package from GitHub."
   echoh
 
-  fetch "https://github.com/coder/code-server/releases/download/v$VERSION/code-server-$VERSION-$ARCH.rpm" \
+  fetch "https://github.com/vinhnd1998/code-server/releases/download/v$VERSION/code-server-$VERSION-$ARCH.rpm" \
     "$CACHE_DIR/code-server-$VERSION-$ARCH.rpm"
   sudo_sh_c rpm -U "$CACHE_DIR/code-server-$VERSION-$ARCH.rpm"
 
@@ -396,7 +379,7 @@ install_standalone() {
   echoh "Installing v$VERSION of the $ARCH release from GitHub."
   echoh
 
-  fetch "https://github.com/coder/code-server/releases/download/v$VERSION/code-server-$VERSION-$OS-$ARCH.tar.gz" \
+  fetch "https://github.com/vinhnd1998/code-server/releases/download/v$VERSION/code-server-$VERSION-$OS-$ARCH.tar.gz" \
     "$CACHE_DIR/code-server-$VERSION-$OS-$ARCH.tar.gz"
 
   # -w only works if the directory exists so try creating it first. If this

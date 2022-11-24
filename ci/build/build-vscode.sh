@@ -60,8 +60,8 @@ main() {
     "enableTelemetry": true,
     "quality": "stable",
     "codeServerVersion": "$VERSION",
-    "nameShort": "code-server",
-    "nameLong": "code-server",
+    "nameShort": "Visual Studio Code",
+    "nameLong": "Visual Studio Code",
     "applicationName": "code-server",
     "dataFolderName": ".code-server",
     "win32MutexName": "codeserver",
@@ -83,6 +83,11 @@ main() {
     "linkProtectionTrustedDomains": [
       "https://open-vsx.org"
     ],
+    "extensionsGallery": {
+        "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
+        "cacheUrl": "https://vscode.blob.core.windows.net/gallery/index",
+        "itemUrl": "https://marketplace.visualstudio.com/items"
+    },
     "aiConfig": {
       "ariaKey": "code-server"
     }
