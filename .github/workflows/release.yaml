@@ -2,6 +2,11 @@ name: Draft release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: The version to publish (include "v", i.e. "v4.9.1").
+        type: string
+        required: true
 
 permissions:
   contents: write # For creating releases.
@@ -37,6 +42,7 @@ jobs:
     name: Linux cross-compile builds
     runs-on: ubuntu-18.04
     timeout-minutes: 15
+    needs: npm-version
     strategy:
       matrix:
         include:
@@ -71,15 +77,10 @@ jobs:
         env:
           PACKAGE: ${{ format('g++-{0}', matrix.prefix) }}
 
-      - name: Download artifacts
-        uses: dawidd6/action-download-artifact@v2
-        id: download
+      - name: Download npm package
+        uses: actions/download-artifact@v3
         with:
-          branch: ${{ github.ref }}
-          workflow: build.yaml
-          workflow_conclusion: completed
-          check_artifacts: true
-          name: npm-package
+          name: npm-release-package
 
       - name: Decompress npm package
         run: tar -xzf package.tar.gz
@@ -93,7 +94,16 @@ jobs:
           tar -xf node-${NODE_VERSION}-linux-${NPM_CONFIG_ARCH}.tar.xz node-${NODE_VERSION}-linux-${NPM_CONFIG_ARCH}/bin/node --strip-components=2
           mv ./node ./release-standalone/lib/node
 
+      # NOTE@jsjoeio - we do this so we can strip out the v
+      # i.e. v4.9.1 -> 4.9.1
+      - name: Get and set VERSION
+        run: |
+          TAG="${{ inputs.version || github.ref_name }}"
+          echo "VERSION=${TAG#v}" >> $GITHUB_ENV
+
       - name: Build packages with nfpm
+        env:
+          VERSION: ${{ env.VERSION }}
         run: yarn package ${NPM_CONFIG_ARCH}
 
       - uses: softprops/action-gh-release@v1
@@ -101,5 +111,4 @@ jobs:
           draft: true
           discussion_category_name: "📣 Announcements"
           files: ./release-packages/*
-
 
