@@ -113,3 +113,64 @@ jobs:
           discussion_category_name: "📣 Announcements"
           files: ./release-packages/*
 
+  npm-package:
+    name: Upload npm package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: npm-version
+    steps:
+      - name: Download npm package
+        uses: actions/download-artifact@v3
+        with:
+          name: npm-release-package
+
+      - uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          discussion_category_name: "📣 Announcements"
+          files: ./package.tar.gz
+
+  npm-version:
+    name: Modify package.json version
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Download artifacts
+        uses: dawidd6/action-download-artifact@v2
+        id: download
+        with:
+          branch: ${{ github.ref }}
+          workflow: build.yaml
+          workflow_conclusion: completed
+          name: npm-package
+          check_artifacts: false
+          if_no_artifact_found: fail
+
+      - name: Decompress npm package
+        run: tar -xzf package.tar.gz
+
+      # NOTE@jsjoeio - we do this so we can strip out the v
+      # i.e. v4.9.1 -> 4.9.1
+      - name: Get and set VERSION
+        run: |
+          TAG="${{ inputs.version || github.ref_name }}"
+          echo "VERSION=${TAG#v}" >> $GITHUB_ENV
+      - name: Modify version
+        env:
+          VERSION: ${{ env.VERSION }}
+        run: |
+          echo "Updating version in root package.json"
+          npm version --prefix release "$VERSION"
+          echo "Updating version in lib/vscode/product.json"
+          tmp=$(mktemp) 
+          jq ".codeServerVersion = \"$VERSION\"" release/lib/vscode/product.json > "$tmp" && mv "$tmp" release/lib/vscode/product.json
+          # Ensure it has the same permissions as before
+          chmod 644 release/lib/vscode/product.json
+      - name: Compress release package
+        run: tar -czf package.tar.gz release
+
+      - name: Upload npm package artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: npm-release-package
+          path: ./package.tar.gz
