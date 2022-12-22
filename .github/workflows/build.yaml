@@ -1,12 +1,12 @@
 name: Build
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: The version to build (include "v", i.e. "v4.9.1").
-        type: string
-        required: true
+  push:
+    branches:
+      - release
+  pull_request:
+    branches:
+      - release
 
 # Cancel in-progress runs for pull requests when developers push
 # additional changes, and serialize builds in branches.
