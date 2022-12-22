@@ -3,10 +3,10 @@ name: Build
 on:
   push:
     branches:
-      - main
+      - release
   pull_request:
     branches:
-      - main
+      - release
 
 # Cancel in-progress runs for pull requests when developers push
 # additional changes, and serialize builds in branches.
