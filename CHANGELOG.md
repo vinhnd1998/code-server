@@ -20,6 +20,42 @@ Code v99.99.999
 
 -->
 
+## [4.9.1](https://github.com/coder/code-server/releases/tag/v4.9.1) - 2022-12-15
+
+Code v1.73.1
+
+### Changed
+
+- Updated a couple steps in the build and release process to ensure we're using
+  `npm` and `yarn` consistently depending on the step.
+
+### Fixed
+
+- Fixed an issue with code-server version not displaying in the Help > About window.
+- Fixed terminal not loading on macOS clients.
+
+## [4.9.0](https://github.com/coder/code-server/releases/tag/v4.9.0) - 2022-12-06
+
+Code v1.73.1
+
+### Changed
+
+- Upgraded to Code 1.73.1
+
+### Added
+
+- `/security.txt` added as a route with info on our security policy information thanks to @ghuntley
+
+### Fixed
+
+- Installing on majaro images should now work thanks to @MrPeacockNLB for
+  adding the `--noconfirm` flag in `install.sh`
+
+### Known Issues
+
+- `--cert` on Ubuntu 22.04: OpenSSL v3 is used which breaks `pem` meaning the
+  `--cert` feature will not work. [Reference](https://github.com/adobe/fetch/pull/318#issuecomment-1306070259)
+
 ## [4.8.3](https://github.com/coder/code-server/releases/tag/v4.8.3) - 2022-11-07
 
 Code v1.72.1
