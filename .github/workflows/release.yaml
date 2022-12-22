@@ -113,38 +113,15 @@ jobs:
           discussion_category_name: "📣 Announcements"
           files: ./release-packages/*
 
-  npm-package:
-    name: Upload npm package
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: npm-version
-    steps:
-      - name: Download npm package
-        uses: actions/download-artifact@v3
-        with:
-          name: npm-release-package
-
-      - uses: softprops/action-gh-release@v1
-        with:
-          draft: true
-          discussion_category_name: "📣 Announcements"
-          files: ./package.tar.gz
-
   npm-version:
     name: Modify package.json version
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Download artifacts
-        uses: dawidd6/action-download-artifact@v2
-        id: download
+        uses: actions/download-artifact@v3
         with:
-          branch: ${{ github.ref }}
-          workflow: build.yaml
-          workflow_conclusion: completed
           name: npm-package
-          check_artifacts: false
-          if_no_artifact_found: fail
 
       - name: Decompress npm package
         run: tar -xzf package.tar.gz
