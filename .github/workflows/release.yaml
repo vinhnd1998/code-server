@@ -119,8 +119,13 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: dawidd6/action-download-artifact@v2
+        id: download
         with:
+          branch: ${{ github.ref }}
+          workflow: build.yaml
+          workflow_conclusion: completed
+          check_artifacts: true
           name: npm-package
 
       - name: Decompress npm package
