@@ -38,9 +38,9 @@
       "path": "./guide.md",
       "children": [
         {
-          "title": "--link",
-          "description": "How to run code-server --link",
-          "path": "./link.md"
+          "title": "Coder",
+          "description": "How to run code-server in Coder",
+          "path": "./coder.md"
         },
         {
           "title": "iPad",

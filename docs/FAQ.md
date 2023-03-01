@@ -26,6 +26,7 @@
 - [Is multi-tenancy possible?](#is-multi-tenancy-possible)
 - [Can I use Docker in a code-server container?](#can-i-use-docker-in-a-code-server-container)
 - [How do I disable telemetry?](#how-do-i-disable-telemetry)
+- [What's the difference between code-server and Coder?](#whats-the-difference-between-code-server-and-coder)
 - [What's the difference between code-server and Theia?](#whats-the-difference-between-code-server-and-theia)
 - [What's the difference between code-server and OpenVSCode-Server?](#whats-the-difference-between-code-server-and-openvscode-server)
 - [What's the difference between code-server and GitHub Codespaces?](#whats-the-difference-between-code-server-and-github-codespaces)
@@ -363,6 +364,15 @@ Use the `--disable-telemetry` flag to disable telemetry.
 
 > We use the data collected only to improve code-server.
 
+## What's the difference between code-server and Coder?
+
+code-server and Coder are both applications that can be installed on any
+machine. The main difference is who they serve. Out of the box, code-server is
+simply VS Code in the browser while Coder is a tool for provisioning remote
+development environments via Terraform.
+
+code-server was built for individuals while Coder was built for teams. In Coder, you create Workspaces which can have applications like code-server. If you're looking for a team solution, you should reach for [Coder](https://github.com/coder/coder).
+
 ## What's the difference between code-server and Theia?
 
 At a high level, code-server is a patched fork of VS Code that runs in the
@@ -380,19 +390,13 @@ Theia doesn't allow you to reuse your existing VS Code config.
 ## What's the difference between code-server and OpenVSCode-Server?
 
 code-server and OpenVSCode-Server both allow you to access VS Code via a
-browser. The two projects also use their own [forks of VS Code](https://github.com/coder/vscode) to
-leverage modern VS Code APIs and stay up to date with the upsteam version.
+browser. OpenVSCode-Server is a direct fork of VS Code with changes comitted
+directly while code-server pulls VS Code in via a submodule and makes changes
+via patch files.
 
-However, OpenVSCode-Server is scoped at only making VS Code available in the web browser.
-code-server includes some other features:
-
-- password auth
-- proxy web ports
-- certificate support
-- plugin API
-- settings sync (coming soon)
-
-For more details, see [this discussion post](https://github.com/coder/code-server/discussions/4267#discussioncomment-1411583).
+However, OpenVSCode-Server is scoped at only making VS Code available as-is in
+the web browser. code-server contains additional changes to make the self-hosted
+experience better (see the next section for details).
 
 ## What's the difference between code-server and GitHub Codespaces?
 
@@ -400,8 +404,24 @@ Both code-server and GitHub Codespaces allow you to access VS Code via a
 browser. GitHub Codespaces, however, is a closed-source, paid service offered by
 GitHub and Microsoft.
 
-On the other hand, code-server is self-hosted, free, open-source, and
-can be run on any machine with few limitations.
+On the other hand, code-server is self-hosted, free, open-source, and can be run
+on any machine with few limitations.
+
+Specific changes include:
+
+- Password authentication
+- The ability to host at sub-paths
+- Self-contained web views that do not call out to Microsoft's servers
+- The ability to use your own marketplace and collect your own telemetry
+- Built-in proxy for accessing ports on the remote machine integrated into
+  VS Code's ports panel
+- Wrapper process that spawns VS Code on-demand and has a separate CLI
+- Notification when updates are available
+- [Some other things](https://github.com/coder/code-server/tree/main/patches)
+
+Some of these changes appear very unlikely to ever be adopted by Microsoft.
+Some may make their way upstream, further closing the gap, but at the moment it
+looks like there will always be some subtle differences.
 
 ## Does code-server have any security login validation?
 

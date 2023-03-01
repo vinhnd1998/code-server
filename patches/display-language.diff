@@ -19,7 +19,7 @@ Index: code-server/lib/vscode/src/vs/server/node/serverServices.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/serverServices.ts
 +++ code-server/lib/vscode/src/vs/server/node/serverServices.ts
-@@ -216,6 +216,9 @@ export async function setupServerService
+@@ -220,6 +220,9 @@ export async function setupServerService
  		const channel = new ExtensionManagementChannel(extensionManagementService, (ctx: RemoteAgentConnectionContext) => getUriTransformer(ctx.remoteAuthority));
  		socketServer.registerChannel('extensions', channel);
  
@@ -42,7 +42,7 @@ Index: code-server/lib/vscode/src/vs/base/common/platform.ts
  export const LANGUAGE_DEFAULT = 'en';
  
  let _isWindows = false;
-@@ -83,17 +81,19 @@ if (typeof navigator === 'object' && !is
+@@ -86,17 +84,19 @@ if (typeof navigator === 'object' && !is
  	_isMobile = _userAgent?.indexOf('Mobi') >= 0;
  	_isWeb = true;
  
@@ -125,7 +125,7 @@ Index: code-server/lib/vscode/src/vs/platform/environment/common/environmentServ
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/platform/environment/common/environmentService.ts
 +++ code-server/lib/vscode/src/vs/platform/environment/common/environmentService.ts
-@@ -110,7 +110,7 @@ export abstract class AbstractNativeEnvi
+@@ -107,7 +107,7 @@ export abstract class AbstractNativeEnvi
  			return URI.file(join(vscodePortable, 'argv.json'));
  		}
  

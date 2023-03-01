@@ -102,6 +102,7 @@ spec:
           {{- range .Values.extraSecretMounts }}
           - name: {{ .name }}
             mountPath: {{ .mountPath }}
+            subPath: {{ .subPath | default "" }}
             readOnly: {{ .readOnly }}
           {{- end }}
           {{- range .Values.extraVolumeMounts }}
@@ -114,6 +115,11 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
+          {{- range .Values.extraPorts }}
+            - name: {{ .name }}
+              containerPort: {{ .port }}
+              protocol: {{ .protocol }}
+          {{- end }}
           livenessProbe:
             httpGet:
               path: /
