@@ -89,7 +89,7 @@ main() {
     "linkProtectionTrustedDomains": [
       "https://open-vsx.org",
       "https://marketplace.visualstudio.com",
-      "https://vscode.blob.core.windows.net",
+      "https://vscode.blob.core.windows.net"
     ],
     "extensionsGallery": {
         "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
