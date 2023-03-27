@@ -87,12 +87,16 @@ main() {
     "tipsAndTricksUrl": "https://go.microsoft.com/fwlink/?linkid=852118",
     "newsletterSignupUrl": "https://www.research.net/r/vsc-newsletter",
     "linkProtectionTrustedDomains": [
-      "https://open-vsx.org"
+      "https://open-vsx.org",
+      "https://marketplace.visualstudio.com",
+      "https://vscode.blob.core.windows.net",
     ],
     "extensionsGallery": {
         "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
         "cacheUrl": "https://vscode.blob.core.windows.net/gallery/index",
-        "itemUrl": "https://marketplace.visualstudio.com/items"
+        "itemUrl": "https://marketplace.visualstudio.com/items",
+        "controlUrl:"",
+        "recommendationsUrl": ""
     },
     "aiConfig": {
       "ariaKey": "code-server"
