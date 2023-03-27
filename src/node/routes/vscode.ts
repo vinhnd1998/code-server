@@ -7,7 +7,7 @@ import { WebsocketRequest } from "../../../typings/pluginapi"
 import { logError } from "../../common/util"
 import { CodeArgs, toCodeArgs } from "../cli"
 import { isDevMode } from "../constants"
-import { authenticated, ensureAuthenticated, redirect, replaceTemplates, self } from "../http"
+import { authenticated, ensureAuthenticated, ensureOrigin, redirect, replaceTemplates, self } from "../http"
 import { SocketProxyProvider } from "../socket"
 import { isFile, loadAMDModule } from "../util"
 import { Router as WsRouter } from "../wsRouter"
@@ -40,6 +40,7 @@ export class CodeServerRouteWrapper {
   //#region Route Handlers
 
   private manifest: express.Handler = async (req, res, next) => {
+    const appName = req.args["app-name"] || "code-server"
     res.writeHead(200, { "Content-Type": "application/manifest+json" })
 
     return res.end(
@@ -47,8 +48,8 @@ export class CodeServerRouteWrapper {
         req,
         JSON.stringify(
           {
-            name: "code-server",
-            short_name: "code-server",
+            name: appName,
+            short_name: appName,
             start_url: ".",
             display: "fullscreen",
             description: "Run Code on a remote server.",
@@ -173,7 +174,7 @@ export class CodeServerRouteWrapper {
     this.router.get("/", this.ensureCodeServerLoaded, this.$root)
     this.router.get("/manifest.json", this.manifest)
     this.router.all("*", ensureAuthenticated, this.ensureCodeServerLoaded, this.$proxyRequest)
-    this._wsRouterWrapper.ws("*", ensureAuthenticated, this.ensureCodeServerLoaded, this.$proxyWebsocket)
+    this._wsRouterWrapper.ws("*", ensureOrigin, ensureAuthenticated, this.ensureCodeServerLoaded, this.$proxyWebsocket)
   }
 
   dispose() {
