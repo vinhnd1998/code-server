@@ -3,17 +3,8 @@ import { promises as fs } from "fs"
 import { load } from "js-yaml"
 import * as os from "os"
 import * as path from "path"
-import {
-  canConnect,
-  generateCertificate,
-  generatePassword,
-  humanPath,
-  paths,
-  isNodeJSErrnoException,
-  splitOnFirstEquals,
-} from "./util"
-
-const DEFAULT_SOCKET_PATH = path.join(os.tmpdir(), "vscode-ipc")
+import { generateCertificate, generatePassword, humanPath, paths, splitOnFirstEquals } from "./util"
+import { EditorSessionManagerClient } from "./vscodeSocket"
 
 export enum Feature {
   // No current experimental features!
@@ -60,6 +51,7 @@ export interface UserProvidedCodeArgs {
   "disable-file-downloads"?: boolean
   "disable-workspace-trust"?: boolean
   "disable-getting-started-override"?: boolean
+  "session-socket"?: string
 }
 
 /**
@@ -168,6 +160,9 @@ export const options: Options<Required<UserProvidedArgs>> = {
     description:
       "Disable update check. Without this flag, code-server checks every 6 hours against the latest github release and \n" +
       "then notifies you once every week that a new release is available.",
+  },
+  "session-socket": {
+    type: "string",
   },
   "disable-file-downloads": {
     type: "boolean",
@@ -433,17 +428,21 @@ export const parse = (
     throw new Error("--cert-key is missing")
   }
 
-  logger.debug(() => [
-    `parsed ${opts?.configFile ? "config" : "command line"}`,
-    field("args", {
-      ...args,
-      password: args.password ? "<redacted>" : undefined,
-      "hashed-password": args["hashed-password"] ? "<redacted>" : undefined,
-      "github-auth": args["github-auth"] ? "<redacted>" : undefined,
-    }),
-  ])
+  logger.debug(() => [`parsed ${opts?.configFile ? "config" : "command line"}`, field("args", redactArgs(args))])
 
   return args
+}
+
+/**
+ * Redact sensitive information from arguments for logging.
+ */
+export const redactArgs = (args: UserProvidedArgs): UserProvidedArgs => {
+  return {
+    ...args,
+    password: args.password ? "<redacted>" : undefined,
+    "hashed-password": args["hashed-password"] ? "<redacted>" : undefined,
+    "github-auth": args["github-auth"] ? "<redacted>" : undefined,
+  }
 }
 
 /**
@@ -464,6 +463,7 @@ export interface DefaultedArgs extends ConfigArgs {
   usingEnvHashedPassword: boolean
   "extensions-dir": string
   "user-data-dir": string
+  "session-socket": string
   /* Positional arguments. */
   _: string[]
 }
@@ -483,6 +483,11 @@ export async function setDefaults(cliArgs: UserProvidedArgs, configArgs?: Config
   if (!args["extensions-dir"]) {
     args["extensions-dir"] = path.join(args["user-data-dir"], "extensions")
   }
+
+  if (!args["session-socket"]) {
+    args["session-socket"] = path.join(args["user-data-dir"], "code-server-ipc.sock")
+  }
+  process.env.CODE_SERVER_SESSION_SOCKET = args["session-socket"]
 
   // --verbose takes priority over --log and --log takes priority over the
   // environment variable.
@@ -570,17 +575,34 @@ export async function setDefaults(cliArgs: UserProvidedArgs, configArgs?: Config
 
   // Filter duplicate proxy domains and remove any leading `*.`.
   const proxyDomains = new Set((args["proxy-domain"] || []).map((d) => d.replace(/^\*\./, "")))
-  args["proxy-domain"] = Array.from(proxyDomains)
+  const finalProxies = []
 
-  if (typeof args._ === "undefined") {
-    args._ = []
+  for (const proxyDomain of proxyDomains) {
+    if (!proxyDomain.includes("{{port}}")) {
+      finalProxies.push("{{port}}." + proxyDomain)
+    } else {
+      finalProxies.push(proxyDomain)
+    }
   }
+
+  // all proxies are of format anyprefix-{{port}}-anysuffix.{{host}}, where {{host}} is optional
+  // e.g. code-8080.domain.tld would match for code-{{port}}.domain.tld and code-{{port}}.{{host}}
+  if (finalProxies.length > 0 && !process.env.VSCODE_PROXY_URI) {
+    process.env.VSCODE_PROXY_URI = `//${finalProxies[0]}`
+  }
+  args["proxy-domain"] = finalProxies
+
+  args._ = getResolvedPathsFromArgs(args)
 
   return {
     ...args,
     usingEnvPassword,
     usingEnvHashedPassword,
   } as DefaultedArgs // TODO: Technically no guarantee this is fulfilled.
+}
+
+export function getResolvedPathsFromArgs(args: UserProvidedArgs): string[] {
+  return (args._ ?? []).map((p) => path.resolve(p))
 }
 
 /**
@@ -723,46 +745,37 @@ function bindAddrFromAllSources(...argsConfig: UserProvidedArgs[]): Addr {
 }
 
 /**
- * Reads the socketPath based on path passed in.
- *
- * The one usually passed in is the DEFAULT_SOCKET_PATH.
- *
- * If it can't read the path, it throws an error and returns undefined.
- */
-export async function readSocketPath(path: string): Promise<string | undefined> {
-  try {
-    return await fs.readFile(path, "utf8")
-  } catch (error) {
-    // If it doesn't exist, we don't care.
-    // But if it fails for some reason, we should throw.
-    // We want to surface that to the user.
-    if (!isNodeJSErrnoException(error) || error.code !== "ENOENT") {
-      throw error
-    }
-  }
-  return undefined
-}
-
-/**
  * Determine if it looks like the user is trying to open a file or folder in an
  * existing instance. The arguments here should be the arguments the user
  * explicitly passed on the command line, *NOT DEFAULTS* or the configuration.
  */
-export const shouldOpenInExistingInstance = async (args: UserProvidedArgs): Promise<string | undefined> => {
+export const shouldOpenInExistingInstance = async (
+  args: UserProvidedArgs,
+  sessionSocket: string,
+): Promise<string | undefined> => {
   // Always use the existing instance if we're running from VS Code's terminal.
   if (process.env.VSCODE_IPC_HOOK_CLI) {
     logger.debug("Found VSCODE_IPC_HOOK_CLI")
     return process.env.VSCODE_IPC_HOOK_CLI
   }
 
+  const paths = getResolvedPathsFromArgs(args)
+  const client = new EditorSessionManagerClient(sessionSocket)
+
   // If these flags are set then assume the user is trying to open in an
-  // existing instance since these flags have no effect otherwise.
+  // existing instance since these flags have no effect otherwise.  That means
+  // if there is no existing instance we should error rather than falling back
+  // to spawning code-server normally.
   const openInFlagCount = ["reuse-window", "new-window"].reduce((prev, cur) => {
     return args[cur as keyof UserProvidedArgs] ? prev + 1 : prev
   }, 0)
   if (openInFlagCount > 0) {
     logger.debug("Found --reuse-window or --new-window")
-    return readSocketPath(DEFAULT_SOCKET_PATH)
+    const socketPath = await client.getConnectedSocketPath(paths[0])
+    if (!socketPath) {
+      throw new Error(`No opened code-server instances found to handle ${paths[0]}`)
+    }
+    return socketPath
   }
 
   // It's possible the user is trying to spawn another instance of code-server.
@@ -770,9 +783,13 @@ export const shouldOpenInExistingInstance = async (args: UserProvidedArgs): Prom
   //    code-server is invoked exactly like this: `code-server my-file`).
   // 2. That a file or directory was passed.
   // 3. That the socket is active.
+  // 4. That an instance exists to handle the path (implied by #3).
   if (Object.keys(args).length === 1 && typeof args._ !== "undefined" && args._.length > 0) {
-    const socketPath = await readSocketPath(DEFAULT_SOCKET_PATH)
-    if (socketPath && (await canConnect(socketPath))) {
+    if (!(await client.canConnect())) {
+      return undefined
+    }
+    const socketPath = await client.getConnectedSocketPath(paths[0])
+    if (socketPath) {
       logger.debug("Found existing code-server socket")
       return socketPath
     }

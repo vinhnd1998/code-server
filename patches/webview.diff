@@ -41,7 +41,7 @@ Index: code-server/lib/vscode/src/vs/workbench/services/environment/browser/envi
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/workbench/services/environment/browser/environmentService.ts
 +++ code-server/lib/vscode/src/vs/workbench/services/environment/browser/environmentService.ts
-@@ -224,7 +224,7 @@ export class BrowserWorkbenchEnvironment
+@@ -225,7 +225,7 @@ export class BrowserWorkbenchEnvironment
  
  	@memoize
  	get webviewExternalEndpoint(): string {
@@ -54,7 +54,7 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/webClientServer.ts
 +++ code-server/lib/vscode/src/vs/server/node/webClientServer.ts
-@@ -302,6 +302,7 @@ export class WebClientServer {
+@@ -316,6 +316,7 @@ export class WebClientServer {
  
  		const workbenchWebConfiguration = {
  			remoteAuthority,
@@ -70,12 +70,12 @@ Index: code-server/lib/vscode/src/vs/workbench/contrib/webview/browser/pre/index
  	<meta charset="UTF-8">
  
  	<meta http-equiv="Content-Security-Policy"
--		content="default-src 'none'; script-src 'sha256-RaCvj6SRgHm+2C3LKzSAamDwa3Bp4u4iQ1Y2Sm+97tE=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
-+		content="default-src 'none'; script-src 'sha256-mi72idjvdhsPSBMKFqU82FG/kZVJjKR0TfHLE13gB+w=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
+-		content="default-src 'none'; script-src 'sha256-N4YFn5ze5crjPqMK/opogKs7bSGWtf3lmjV/3LfbSOs=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
++		content="default-src 'none'; script-src 'sha256-B5FRTRmagxqZ2yiS/ip5EgFZJPHAF0G0O3NgwgN6hhg=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
  
  	<!-- Disable pinch zooming -->
  	<meta name="viewport"
-@@ -325,6 +325,12 @@
+@@ -334,6 +334,12 @@
  
  				const hostname = location.hostname;
  
@@ -92,7 +92,7 @@ Index: code-server/lib/vscode/src/vs/workbench/contrib/webview/browser/pre/index
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/workbench/contrib/webview/browser/pre/index-no-csp.html
 +++ code-server/lib/vscode/src/vs/workbench/contrib/webview/browser/pre/index-no-csp.html
-@@ -324,6 +324,12 @@
+@@ -333,6 +333,12 @@
  
  				const hostname = location.hostname;
  

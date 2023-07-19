@@ -1,7 +1,6 @@
 import { field, logger } from "@coder/logger"
 import http from "http"
 import * as os from "os"
-import path from "path"
 import { Disposable } from "../common/emitter"
 import { plural } from "../common/util"
 import { createApp, ensureAddress } from "./app"
@@ -70,9 +69,8 @@ export const openInExistingInstance = async (args: DefaultedArgs, socketPath: st
     forceNewWindow: args["new-window"],
     gotoLineMode: true,
   }
-  const paths = args._ || []
-  for (let i = 0; i < paths.length; i++) {
-    const fp = path.resolve(paths[i])
+  for (let i = 0; i < args._.length; i++) {
+    const fp = args._[i]
     if (await isDirectory(fp)) {
       pipeArgs.folderURIs.push(fp)
     } else {
@@ -127,7 +125,6 @@ export const runCodeServer = async (
 
   logger.info(`Using config file ${humanPath(os.homedir(), args.config)}`)
   logger.info(`${protocol.toUpperCase()} server listening on ${serverAddress.toString()}`)
-
   if (args.auth === AuthType.Password) {
     logger.info("  - Authentication is enabled")
     if (args.usingEnvPassword) {
@@ -149,7 +146,15 @@ export const runCodeServer = async (
 
   if (args["proxy-domain"].length > 0) {
     logger.info(`  - ${plural(args["proxy-domain"].length, "Proxying the following domain")}:`)
-    args["proxy-domain"].forEach((domain) => logger.info(`    - *.${domain}`))
+    args["proxy-domain"].forEach((domain) => logger.info(`    - ${domain}`))
+  }
+  if (process.env.VSCODE_PROXY_URI) {
+    logger.info(`Using proxy URI in PORTS tab: ${process.env.VSCODE_PROXY_URI}`)
+  }
+
+  const sessionServerAddress = app.editorSessionManagerServer.address()
+  if (sessionServerAddress) {
+    logger.info(`Session server listening on ${sessionServerAddress.toString()}`)
   }
 
   if (args.enable && args.enable.length > 0) {
