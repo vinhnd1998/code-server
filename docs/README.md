@@ -2,7 +2,7 @@
 
 Install 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/vinhnd1998/code-server/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/vinhnd1998/code-server/release/install.sh | sh
 ```
 
 
