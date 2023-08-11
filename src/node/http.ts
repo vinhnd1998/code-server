@@ -76,6 +76,25 @@ export const replaceTemplates = <T extends object>(
 }
 
 /**
+ * Throw an error if proxy is not enabled. Call `next` if provided.
+ */
+export const ensureProxyEnabled = (req: express.Request, _?: express.Response, next?: express.NextFunction): void => {
+  if (!proxyEnabled(req)) {
+    throw new HttpError("Forbidden", HttpCode.Forbidden)
+  }
+  if (next) {
+    next()
+  }
+}
+
+/**
+ * Return true if proxy is enabled.
+ */
+export const proxyEnabled = (req: express.Request): boolean => {
+  return !req.args["disable-proxy"]
+}
+
+/**
  * Throw an error if not authorized. Call `next` if provided.
  */
 export const ensureAuthenticated = async (
@@ -353,6 +372,11 @@ export function authenticateOrigin(req: express.Request): void {
     origin = new URL(originRaw).host.trim().toLowerCase()
   } catch (error) {
     throw new Error(`unable to parse malformed origin "${originRaw}"`)
+  }
+
+  const trustedOrigins = req.args["trusted-origins"] || []
+  if (trustedOrigins.includes(origin) || trustedOrigins.includes("*")) {
+    return
   }
 
   const host = getHost(req)

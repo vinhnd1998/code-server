@@ -51,6 +51,7 @@ export interface UserProvidedCodeArgs {
   "disable-file-downloads"?: boolean
   "disable-workspace-trust"?: boolean
   "disable-getting-started-override"?: boolean
+  "disable-proxy"?: boolean
   "session-socket"?: string
 }
 
@@ -79,6 +80,7 @@ export interface UserProvidedArgs extends UserProvidedCodeArgs {
   "bind-addr"?: string
   socket?: string
   "socket-mode"?: string
+  "trusted-origins"?: string[]
   version?: boolean
   "proxy-domain"?: string[]
   "reuse-window"?: boolean
@@ -177,6 +179,10 @@ export const options: Options<Required<UserProvidedArgs>> = {
     type: "boolean",
     description: "Disable the coder/coder override in the Help: Getting Started page.",
   },
+  "disable-proxy": {
+    type: "boolean",
+    description: "Disable domain and path proxy routes.",
+  },
   // --enable can be used to enable experimental features. These features
   // provide no guarantees.
   enable: { type: "string[]" },
@@ -208,6 +214,11 @@ export const options: Options<Required<UserProvidedArgs>> = {
 
   socket: { type: "string", path: true, description: "Path to a socket (bind-addr will be ignored)." },
   "socket-mode": { type: "string", description: "File mode of the socket." },
+  "trusted-origins": {
+    type: "string[]",
+    description:
+      "Disables authenticate origin check for trusted origin. Useful if not able to access reverse proxy configuration.",
+  },
   version: { type: "boolean", short: "v", description: "Display version information." },
   _: { type: "string[]" },
 
@@ -556,6 +567,10 @@ export async function setDefaults(cliArgs: UserProvidedArgs, configArgs?: Config
 
   if (process.env.CS_DISABLE_GETTING_STARTED_OVERRIDE?.match(/^(1|true)$/)) {
     args["disable-getting-started-override"] = true
+  }
+
+  if (process.env.CS_DISABLE_PROXY?.match(/^(1|true)$/)) {
+    args["disable-proxy"] = true
   }
 
   const usingEnvHashedPassword = !!process.env.HASHED_PASSWORD

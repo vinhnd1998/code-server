@@ -14,6 +14,7 @@
 - [How do I install an extension manually?](#how-do-i-install-an-extension-manually)
 - [How do I use my own extensions marketplace?](#how-do-i-use-my-own-extensions-marketplace)
 - [Where are extensions stored?](#where-are-extensions-stored)
+- [Where is VS Code configuration stored?](#where-is-vs-code-configuration-stored)
 - [How can I reuse my VS Code configuration?](#how-can-i-reuse-my-vs-code-configuration)
 - [How does code-server decide what workspace or folder to open?](#how-does-code-server-decide-what-workspace-or-folder-to-open)
 - [How do I access my Documents/Downloads/Desktop folders in code-server on macOS?](#how-do-i-access-my-documentsdownloadsdesktop-folders-in-code-server-on-macos)
@@ -34,6 +35,7 @@
 - [Are there community projects involving code-server?](#are-there-community-projects-involving-code-server)
 - [How do I change the port?](#how-do-i-change-the-port)
 - [How do I hide the coder/coder promotion in Help: Getting Started?](#how-do-i-hide-the-codercoder-promotion-in-help-getting-started)
+- [How do I disable the proxy?](#how-do-i-disable-the-proxy)
 - [How do I disable file download?](#how-do-i-disable-file-download)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -191,10 +193,20 @@ docs](https://github.com/VSCodium/vscodium/blob/master/DOCS.md#extensions--marke
 
 ## Where are extensions stored?
 
-Extensions are store, by default, to `~/.local/share/code-server/extensions`.
+Extensions are stored in `~/.local/share/code-server/extensions` by default.
 
-If you set the `XDG_DATA_HOME` environment variable, the data directory will be
-`$XDG_DATA_HOME/code-server/extensions`. In general, we try to follow the XDG directory spec.
+On Linux and macOS if you set the `XDG_DATA_HOME` environment variable, the
+extensions directory will be `$XDG_DATA_HOME/code-server/extensions`. In
+general, we try to follow the XDG directory spec.
+
+## Where is VS Code configuration stored?
+
+VS Code configuration such as settings and keybindings are stored in
+`~/.local/share/code-server` by default.
+
+On Linux and macOS if you set the `XDG_DATA_HOME` environment variable, the data
+directory will be `$XDG_DATA_HOME/code-server`. In general, we try to follow the
+XDG directory spec.
 
 ## How can I reuse my VS Code configuration?
 
@@ -452,6 +464,19 @@ There are two ways to change the port on which code-server runs:
 You can pass the flag `--disable-getting-started-override` to `code-server` or
 you can set the environment variable `CS_DISABLE_GETTING_STARTED_OVERRIDE=1` or
 `CS_DISABLE_GETTING_STARTED_OVERRIDE=true`.
+
+## How do I disable the proxy?
+
+You can pass the flag `--disable-proxy` to `code-server` or
+you can set the environment variable `CS_DISABLE_PROXY=1` or
+`CS_DISABLE_PROXY=true`.
+
+Note, this option currently only disables the proxy routes to forwarded ports, including
+the domain and path proxy routes over HTTP and WebSocket; however, it does not
+disable the automatic port forwarding in the VS Code workbench itself. In other words,
+user will still see the Ports tab and notifications, but will not be able to actually
+use access the ports. It is recommended to set `remote.autoForwardPorts` to `false`
+when using the option.
 
 ## How do I disable file download?
 
