@@ -51,17 +51,7 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Fetch dependencies from cache
-        id: cache-node-modules
-        uses: actions/cache@v3
-        with:
-          path: "**/node_modules"
-          key: yarn-build-code-server-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-build-code-server-
-
       - name: Install dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: yarn --frozen-lockfile
 
       - name: Build code-server
