@@ -94,8 +94,10 @@ main() {
     "tipsAndTricksUrl": "https://go.microsoft.com/fwlink/?linkid=852118",
     "newsletterSignupUrl": "https://www.research.net/r/vsc-newsletter",
     "linkProtectionTrustedDomains": [
-      "https://marketplace.visualstudio.com",
-      "https://vscode.blob.core.windows.net"
+      "https://open-vsx.org",
+      "https://vscode.blob.core.windows.net",
+      "https://*.visualstudio.com",
+      "https://*.github.com"
     ],
     "extensionsGallery": {
         "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
