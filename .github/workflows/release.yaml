@@ -77,6 +77,7 @@ jobs:
 
       - name: Install cross-compiler and system dependencies
         run: |
+          sudo echo "foreign-architecture $TARGET_ARCH" > /etc/dpkg/dpkg.cfg.d/multiarch
           sudo dpkg --add-architecture $TARGET_ARCH
           sudo apt update && sudo apt install -y --no-install-recommends \
             crossbuild-essential-$TARGET_ARCH \
