@@ -22,6 +22,40 @@ Code v99.99.999
 
 ## Unreleased
 
+## [4.17.1](https://github.com/coder/code-server/releases/tag/v4.17.1) - 2023-09-29
+
+Code v1.82.2
+
+### Fixed
+
+- Make secret storage persistent. For example, logging in with GitHub should
+  persist between browser refreshes and code-server restarts.
+- Issues with argon2 on arm builds should be fixed now.
+
+## [4.17.0](https://github.com/coder/code-server/releases/tag/v4.17.0) - 2023-09-22
+
+Code v1.82.2
+
+### Added
+
+- Japanese locale.
+- `CODE_SERVER_HOST` environment variable.
+
+### Changed
+
+- Update to Code 1.82.2. This includes an update to Node 18, which also means
+  that the minimum glibc is now 2.28. If you need to maintain a lower glibc then
+  you can take a version of Node 18 that is compiled with a lower glibc and use
+  that to build code-server (or at a minimum rebuild the native modules).
+- Display paths to config files in full rather than abbreviated. If you have
+  trouble with the password not working please update and make sure the
+  displayed config paths are what you expect.
+
+### Fixed
+
+- Fix some dependency issues for the standalone arm64 and armv7l releases. If
+  you had issues with missing or failing modules please try these new builds.
+
 ## [4.16.1](https://github.com/coder/code-server/releases/tag/v4.16.1) - 2023-07-31
 
 Code v1.80.2
@@ -274,7 +308,7 @@ Code v1.71.0
 
 ### Fixed
 
-- Add flags --unsafe-perm --legacy-peer-deps in `npm-postinstsall.sh` which ensures installing with npm works correctly
+- Add flags --unsafe-perm --legacy-peer-deps in `npm-postinstall.sh` which ensures installing with npm works correctly
 
 ## [4.6.1](https://github.com/coder/code-server/releases/tag/v4.6.1) - 2022-09-31
 
