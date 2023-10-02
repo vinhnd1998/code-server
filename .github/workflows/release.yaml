@@ -42,6 +42,8 @@ jobs:
     name: Linux cross-compile builds
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: npm-version
+    container: "debian:buster"
     strategy:
       matrix:
         include:
