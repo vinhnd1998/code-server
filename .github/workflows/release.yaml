@@ -47,7 +47,8 @@ jobs:
       matrix:
         include:
           - prefix: aarch64-linux-gnu
-            arch: arm64
+            npm_arch: arm64
+            apt_arch: arm64
 
     env:
       AR: ${{ format('{0}-ar', matrix.prefix) }}
@@ -77,9 +78,7 @@ jobs:
 
       - name: Install cross-compiler and system dependencies
         run: |
-          sudo echo "foreign-architecture $TARGET_ARCH" > /etc/dpkg/dpkg.cfg.d/multiarch
-          sudo dpkg --add-architecture $TARGET_ARCH
-          sudo apt update && sudo apt install -y --no-install-recommends \
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends \
             crossbuild-essential-$TARGET_ARCH \
             libx11-dev:$TARGET_ARCH \
             libx11-xcb-dev:$TARGET_ARCH \
