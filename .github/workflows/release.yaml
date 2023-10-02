@@ -40,8 +40,10 @@ jobs:
   # See here: https://github.com/actions/runner-images/issues/6002
   package-linux-cross:
     name: Linux cross-compile builds
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: npm-version
+    container: "debian:buster"
     strategy:
       matrix:
         include:
@@ -50,31 +52,48 @@ jobs:
 
     env:
       AR: ${{ format('{0}-ar', matrix.prefix) }}
+      AS: ${{ format('{0}-as', matrix.prefix) }}
       CC: ${{ format('{0}-gcc', matrix.prefix) }}
+      CPP: ${{ format('{0}-cpp', matrix.prefix) }}
       CXX: ${{ format('{0}-g++', matrix.prefix) }}
-      LINK: ${{ format('{0}-g++', matrix.prefix) }}
-      NPM_CONFIG_ARCH: ${{ matrix.arch }}
-      NODE_VERSION: v16.13.0
+      FC: ${{ format('{0}-gfortran', matrix.prefix) }}
+      LD: ${{ format('{0}-ld', matrix.prefix) }}
+      STRIP: ${{ format('{0}-strip', matrix.prefix) }}
+      PKG_CONFIG_PATH: ${{ format('/usr/lib/{0}/pkgconfig', matrix.prefix) }}
+      TARGET_ARCH: ${{ matrix.apt_arch }}
+      npm_config_arch: ${{ matrix.npm_arch }}
+      NODE_VERSION: v18.15.0
+      # Not building from source results in an x86_64 argon2, as if
+      # npm_config_arch is being ignored.
+      npm_config_build_from_source: true
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Install Node.js v16
+      - name: Install Node.js v18
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "18.15.0"
+
+      - name: Install cross-compiler and system dependencies
+        run: |
+          dpkg --add-architecture $TARGET_ARCH
+          apt-get update && apt-get install -y --no-install-recommends \
+            crossbuild-essential-$TARGET_ARCH \
+            libx11-dev:$TARGET_ARCH \
+            libx11-xcb-dev:$TARGET_ARCH \
+            libxkbfile-dev:$TARGET_ARCH \
+            libsecret-1-dev:$TARGET_ARCH \
+            libkrb5-dev:$TARGET_ARCH \
+            ca-certificates \
+            curl wget rsync gettext-base
 
       - name: Install nfpm
         run: |
           mkdir -p ~/.local/bin
           curl -sSfL https://github.com/goreleaser/nfpm/releases/download/v2.3.1/nfpm_2.3.1_`uname -s`_`uname -m`.tar.gz | tar -C ~/.local/bin -zxv nfpm
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Install cross-compiler
-        run: sudo apt update && sudo apt install $PACKAGE
-        env:
-          PACKAGE: ${{ format('g++-{0}', matrix.prefix) }}
 
       - name: Download npm package
         uses: actions/download-artifact@v3
@@ -84,15 +103,13 @@ jobs:
       - name: Decompress npm package
         run: tar -xzf package.tar.gz
 
-      # NOTE@jsjoeio - npm fails here
-      # so use yarn
       - name: Build standalone release
-        run: yarn release:standalone
+        run: npm run release:standalone
 
       - name: Replace node with cross-compile equivalent
         run: |
-          wget https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-${NPM_CONFIG_ARCH}.tar.xz
-          tar -xf node-${NODE_VERSION}-linux-${NPM_CONFIG_ARCH}.tar.xz node-${NODE_VERSION}-linux-${NPM_CONFIG_ARCH}/bin/node --strip-components=2
+          wget https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-${npm_config_arch}.tar.xz
+          tar -xf node-${NODE_VERSION}-linux-${npm_config_arch}.tar.xz node-${NODE_VERSION}-linux-${npm_config_arch}/bin/node --strip-components=2
           mv ./node ./release-standalone/lib/node
 
       # NOTE@jsjoeio - we do this so we can strip out the v
@@ -105,7 +122,7 @@ jobs:
       - name: Build packages with nfpm
         env:
           VERSION: ${{ env.VERSION }}
-        run: yarn package ${NPM_CONFIG_ARCH}
+        run: npm run package ${npm_config_arch}
 
       - uses: softprops/action-gh-release@v1
         with:
@@ -144,7 +161,7 @@ jobs:
           echo "Updating version in root package.json"
           npm version --prefix release "$VERSION"
           echo "Updating version in lib/vscode/product.json"
-          tmp=$(mktemp) 
+          tmp=$(mktemp)
           jq ".codeServerVersion = \"$VERSION\"" release/lib/vscode/product.json > "$tmp" && mv "$tmp" release/lib/vscode/product.json
           # Ensure it has the same permissions as before
           chmod 644 release/lib/vscode/product.json
