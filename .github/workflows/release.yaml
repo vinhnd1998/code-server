@@ -78,8 +78,8 @@ jobs:
 
       - name: Install cross-compiler and system dependencies
         run: |
-          dpkg --add-architecture $TARGET_ARCH
-          apt-get update && apt-get install -y --no-install-recommends \
+          sudo dpkg --add-architecture $TARGET_ARCH
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends \
             crossbuild-essential-$TARGET_ARCH \
             libx11-dev:$TARGET_ARCH \
             libx11-xcb-dev:$TARGET_ARCH \
