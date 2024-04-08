@@ -63,19 +63,18 @@ jobs:
       PKG_CONFIG_PATH: ${{ format('/usr/lib/{0}/pkgconfig', matrix.prefix) }}
       TARGET_ARCH: ${{ matrix.apt_arch }}
       npm_config_arch: ${{ matrix.npm_arch }}
-      NODE_VERSION: v18.15.0
       # Not building from source results in an x86_64 argon2, as if
       # npm_config_arch is being ignored.
       npm_config_build_from_source: true
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install Node.js v18
-        uses: actions/setup-node@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: "18.15.0"
+          node-version-file: .node-version
 
       - name: Install cross-compiler and system dependencies
         run: |
@@ -97,7 +96,7 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Download npm package
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: npm-release-package
 
@@ -109,8 +108,9 @@ jobs:
 
       - name: Replace node with cross-compile equivalent
         run: |
-          wget https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-${npm_config_arch}.tar.xz
-          tar -xf node-${NODE_VERSION}-linux-${npm_config_arch}.tar.xz node-${NODE_VERSION}-linux-${npm_config_arch}/bin/node --strip-components=2
+          node_version=$(node --version)
+          wget https://nodejs.org/dist/${node_version}/node-${node_version}-linux-${npm_config_arch}.tar.xz
+          tar -xf node-${node_version}-linux-${npm_config_arch}.tar.xz node-${node_version}-linux-${npm_config_arch}/bin/node --strip-components=2
           mv ./node ./release-standalone/lib/node
 
       # NOTE@jsjoeio - we do this so we can strip out the v
@@ -125,7 +125,7 @@ jobs:
           VERSION: ${{ env.VERSION }}
         run: npm run package ${npm_config_arch}
 
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         with:
           draft: true
           discussion_category_name: "📣 Announcements"
@@ -137,7 +137,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Download artifacts
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v3
         id: download
         with:
           branch: ${{ github.ref }}
@@ -170,7 +170,7 @@ jobs:
         run: tar -czf package.tar.gz release
 
       - name: Upload npm package artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: npm-release-package
           path: ./package.tar.gz

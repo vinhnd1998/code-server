@@ -1,48 +1,41 @@
 # syntax=docker/dockerfile:experimental
 
-ARG BASE=debian:12
+ARG BASE=opensuse/tumbleweed
 FROM scratch AS packages
-COPY release-packages/code-server*.deb /tmp/
+COPY release-packages/code-server*.rpm /tmp/
 
 FROM $BASE
 
-RUN apt-get update \
-  && apt-get install -y \
+RUN zypper dup -y \
+    && zypper in -y \
     curl \
-    dumb-init \
     git \
     git-lfs \
     htop \
-    locales \
-    lsb-release \
-    man-db \
     nano \
-    openssh-client \
+    openssh-clients \
     procps \
-    sudo \
-    vim-tiny \
     wget \
     zsh \
-  && git lfs install \
-  && rm -rf /var/lib/apt/lists/*
+    sudo \
+    catatonit \
+    && rm -rf /var/cache/zypp /var/cache/zypper
+RUN git lfs install
 
-# https://wiki.debian.org/Locale#Manually
-RUN sed -i "s/# en_US.UTF-8/en_US.UTF-8/" /etc/locale.gen \
-  && locale-gen
 ENV LANG=en_US.UTF-8
+RUN echo 'LANG="en_US.UTF-8"' > /etc/locale.conf
 
-RUN adduser --gecos '' --disabled-password coder \
-  && echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
+RUN useradd -u 1000 coder && echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
 
-RUN ARCH="$(dpkg --print-architecture)" \
+RUN ARCH="$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')" \
   && curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.6.0/fixuid-0.6.0-linux-$ARCH.tar.gz" | tar -C /usr/local/bin -xzf - \
   && chown root:root /usr/local/bin/fixuid \
   && chmod 4755 /usr/local/bin/fixuid \
   && mkdir -p /etc/fixuid \
   && printf "user: coder\ngroup: coder\n" > /etc/fixuid/config.yml
 
-COPY ci/release-image/entrypoint.sh /usr/bin/entrypoint.sh
-RUN --mount=from=packages,src=/tmp,dst=/tmp/packages dpkg -i /tmp/packages/code-server*$(dpkg --print-architecture).deb
+COPY ci/release-image/entrypoint-catatonit.sh /usr/bin/entrypoint-catatonit.sh
+RUN --mount=from=packages,src=/tmp,dst=/tmp/packages rpm -i /tmp/packages/code-server*$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').rpm
 
 # Allow users to have scripts run on container startup to prepare workspace.
 # https://github.com/coder/code-server/issues/5177
@@ -55,4 +48,4 @@ EXPOSE 8080
 USER 1000
 ENV USER=coder
 WORKDIR /home/coder
-ENTRYPOINT ["/usr/bin/entrypoint.sh", "--bind-addr", "0.0.0.0:8080", "."]
+ENTRYPOINT ["/usr/bin/entrypoint-catatonit.sh", "--bind-addr", "0.0.0.0:8080", "."]

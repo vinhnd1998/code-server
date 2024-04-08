@@ -52,11 +52,17 @@ export const runCodeCli = async (args: DefaultedArgs): Promise<void> => {
 
   try {
     await spawnCli(await toCodeArgs(args))
+    // Rather than have the caller handle errors and exit, spawnCli will exit
+    // itself.  Additionally, it does this on a timeout set to 0.  So, try
+    // waiting for VS Code to exit before giving up and doing it ourselves.
+    await new Promise((r) => setTimeout(r, 1000))
+    logger.warn("Code never exited")
+    process.exit(0)
   } catch (error: any) {
+    // spawnCli catches all errors, but just in case that changes.
     logger.error("Got error from Code", error)
+    process.exit(1)
   }
-
-  process.exit(0)
 }
 
 export const openInExistingInstance = async (args: DefaultedArgs, socketPath: string): Promise<void> => {
@@ -109,7 +115,7 @@ export const runCodeServer = async (
   logger.info(`code-server ${version} ${commit}`)
 
   logger.info(`Using user-data-dir ${args["user-data-dir"]}`)
-  logger.trace(`Using extensions-dir ${args["extensions-dir"]}`)
+  logger.debug(`Using extensions-dir ${args["extensions-dir"]}`)
 
   if (args.auth === AuthType.Password && !args.password && !args["hashed-password"]) {
     throw new Error(

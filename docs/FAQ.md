@@ -177,10 +177,10 @@ If you own a marketplace that implements the VS Code Extension Gallery API, you
 can point code-server to it by setting `$EXTENSIONS_GALLERY`.
 This corresponds directly with the `extensionsGallery` entry in in VS Code's `product.json`.
 
-For example, to use the legacy Coder extensions marketplace:
+For example:
 
 ```bash
-export EXTENSIONS_GALLERY='{"serviceUrl": "https://extensions.coder.com/api"}'
+export EXTENSIONS_GALLERY='{"serviceUrl": "https://my-extensions/api"}'
 ```
 
 Though you can technically use Microsoft's marketplace in this manner, we
@@ -355,6 +355,12 @@ hashed-password: "$argon2i$v=19$m=4096,t=3,p=1$wST5QhBgk2lu1ih4DMuxvg$LS1alrVdIW
 ```
 
 The `hashed-password` field takes precedence over `password`.
+
+If you're using Docker Compose file, in order to make this work, you need to change all the single $ to $$. For example:
+
+```yaml
+- HASHED_PASSWORD=$$argon2i$$v=19$$m=4096,t=3,p=1$$wST5QhBgk2lu1ih4DMuxvg$$LS1alrVdIWtvZHwnzCM1DUGg+5DTO3Dt1d5v9XtLws4
+```
 
 ## Is multi-tenancy possible?
 

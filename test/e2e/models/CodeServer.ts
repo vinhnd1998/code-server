@@ -77,9 +77,9 @@ export class CodeServer {
    */
   private async createWorkspace(): Promise<string> {
     const dir = await this.workspaceDir
-    await fs.mkdir(path.join(dir, "User"), { recursive: true })
+    await fs.mkdir(path.join(dir, "Machine"), { recursive: true })
     await fs.writeFile(
-      path.join(dir, "User/settings.json"),
+      path.join(dir, "Machine/settings.json"),
       JSON.stringify({
         "workbench.startupEditor": "none",
       }),
@@ -401,7 +401,7 @@ export class CodeServerPage {
    * Open a file by using menus.
    */
   async openFile(file: string) {
-    await this.navigateMenus(["File", "Open File"])
+    await this.navigateMenus(["File", "Open File..."])
     await this.navigateQuickInput([path.basename(file)])
     await this.waitForTab(file)
   }
@@ -432,7 +432,7 @@ export class CodeServerPage {
    * it then clicking the match from the results.
    */
   async executeCommandViaMenus(command: string) {
-    await this.navigateMenus(["View", "Command Palette"])
+    await this.navigateMenus(["View", "Command Palette..."])
 
     await this.page.keyboard.type(command)
 
@@ -488,19 +488,19 @@ export class CodeServerPage {
         // splitting them into two steps each we can cancel before running the
         // action.
         steps.push({
-          fn: () => this.page.hover(`${selector} :text("${item}")`, { trial: true }),
+          fn: () => this.page.hover(`${selector} :text-is("${item}")`, { trial: true }),
           name: `${item}:hover:trial`,
         })
         steps.push({
-          fn: () => this.page.hover(`${selector} :text("${item}")`, { force: true }),
+          fn: () => this.page.hover(`${selector} :text-is("${item}")`, { force: true }),
           name: `${item}:hover:force`,
         })
         steps.push({
-          fn: () => this.page.click(`${selector} :text("${item}")`, { trial: true }),
+          fn: () => this.page.click(`${selector} :text-is("${item}")`, { trial: true }),
           name: `${item}:click:trial`,
         })
         steps.push({
-          fn: () => this.page.click(`${selector} :text("${item}")`, { force: true }),
+          fn: () => this.page.click(`${selector} :text-is("${item}")`, { force: true }),
           name: `${item}:click:force`,
         })
       }
