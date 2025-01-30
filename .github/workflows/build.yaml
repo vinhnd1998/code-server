@@ -24,8 +24,8 @@ concurrency:
 jobs:
   build:
     name: Build code-server
-    runs-on: ubuntu-20.04
-    timeout-minutes: 90
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
     env:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       DISABLE_V8_COMPILE_CACHE: 1
@@ -36,7 +36,7 @@ jobs:
           submodules: true
 
       - name: Install system dependencies
-        run: sudo apt update && sudo apt install -y libkrb5-dev && yarn global add node-gyp
+        run: sudo apt update && sudo apt install -y libkrb5-dev
 
       - name: Install quilt
         uses: awalsh128/cache-apt-pkgs-action@latest
@@ -58,8 +58,7 @@ jobs:
 
       - run: SKIP_SUBMODULE_DEPS=1 npm ci
 
-      - name: Build code-server
-        env:
+      - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run build
 
