@@ -58,9 +58,6 @@ jobs:
 
       - run: SKIP_SUBMODULE_DEPS=1 npm ci
 
-      - name: Install dependencies
-        run: yarn --frozen-lockfile
-
       - name: Build code-server
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
