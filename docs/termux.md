@@ -57,7 +57,7 @@ npm config set python python3
 node -v
 ```
 
-you will get Node version `v18`
+you will get Node version `v20`
 
 5. Now install code-server following our guide on [installing with npm](./npm.md)
 
@@ -70,7 +70,7 @@ code-server --auth none
 7. If already installed then use the following command for upgradation.
 
 ```
-npm update --global code-server --unsafe-perm
+npm update --global code-server
 ```
 
 ## Upgrade

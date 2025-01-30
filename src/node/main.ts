@@ -1,12 +1,14 @@
 import { field, logger } from "@coder/logger"
 import http from "http"
+import * as path from "path"
 import { Disposable } from "../common/emitter"
 import { plural } from "../common/util"
 import { createApp, ensureAddress } from "./app"
-import { AuthType, DefaultedArgs, Feature, SpawnCodeCli, toCodeArgs, UserProvidedArgs } from "./cli"
-import { commit, version } from "./constants"
+import { AuthType, DefaultedArgs, Feature, toCodeArgs, UserProvidedArgs } from "./cli"
+import { commit, version, vsRootPath } from "./constants"
 import { register } from "./routes"
-import { isDirectory, loadAMDModule, open } from "./util"
+import { VSCodeModule } from "./routes/vscode"
+import { isDirectory, open } from "./util"
 
 /**
  * Return true if the user passed an extension-related VS Code flag.
@@ -46,12 +48,13 @@ export interface OpenCommandPipeArgs {
  */
 export const runCodeCli = async (args: DefaultedArgs): Promise<void> => {
   logger.debug("Running Code CLI")
-
-  // See ../../lib/vscode/src/vs/server/node/server.main.ts:65.
-  const spawnCli = await loadAMDModule<SpawnCodeCli>("vs/server/node/server.main", "spawnCli")
-
   try {
-    await spawnCli(await toCodeArgs(args))
+    // See vscode.loadVSCode for more on this jank.
+    process.env.CODE_SERVER_PARENT_PID = process.pid.toString()
+    const modPath = path.join(vsRootPath, "out/server-main.js")
+    const mod = (await eval(`import("${modPath}")`)) as VSCodeModule
+    const serverModule = await mod.loadCodeWithNls()
+    await serverModule.spawnCli(await toCodeArgs(args))
     // Rather than have the caller handle errors and exit, spawnCli will exit
     // itself.  Additionally, it does this on a timeout set to 0.  So, try
     // waiting for VS Code to exit before giving up and doing it ourselves.
@@ -162,6 +165,11 @@ export const runCodeServer = async (
   const sessionServerAddress = app.editorSessionManagerServer.address()
   if (sessionServerAddress) {
     logger.info(`Session server listening on ${sessionServerAddress.toString()}`)
+  }
+
+  if (process.env.EXTENSIONS_GALLERY) {
+    logger.info("Using custom extensions gallery")
+    logger.debug(`  - ${process.env.EXTENSIONS_GALLERY}`)
   }
 
   if (args.enable && args.enable.length > 0) {

@@ -53,6 +53,7 @@ export interface UserProvidedCodeArgs {
   "disable-getting-started-override"?: boolean
   "disable-proxy"?: boolean
   "session-socket"?: string
+  "abs-proxy-base-path"?: string
 }
 
 /**
@@ -117,18 +118,18 @@ interface Option<T> {
 type OptionType<T> = T extends boolean
   ? "boolean"
   : T extends OptionalString
-  ? typeof OptionalString
-  : T extends LogLevel
-  ? typeof LogLevel
-  : T extends AuthType
-  ? typeof AuthType
-  : T extends number
-  ? "number"
-  : T extends string
-  ? "string"
-  : T extends string[]
-  ? "string[]"
-  : "unknown"
+    ? typeof OptionalString
+    : T extends LogLevel
+      ? typeof LogLevel
+      : T extends AuthType
+        ? typeof AuthType
+        : T extends number
+          ? "number"
+          : T extends string
+            ? "string"
+            : T extends string[]
+              ? "string[]"
+              : "unknown"
 
 export type Options<T> = {
   [P in keyof T]: Option<OptionType<T[P]>>
@@ -278,6 +279,10 @@ export const options: Options<Required<UserProvidedArgs>> = {
     type: "string",
     short: "w",
     description: "Text to show on login page",
+  },
+  "abs-proxy-base-path": {
+    type: "string",
+    description: "The base path to prefix to all absproxy requests",
   },
 }
 
@@ -833,25 +838,17 @@ export interface CodeArgs extends UserProvidedCodeArgs {
   version: boolean
   "without-connection-token"?: boolean
   "without-browser-env-var"?: boolean
-  compatibility: string
-  log: string[] | undefined
+  compatibility?: string
+  log?: string[]
 }
 
 /**
- * Types for ../../lib/vscode/src/vs/server/node/server.main.ts:65.
- */
-export type SpawnCodeCli = (args: CodeArgs) => Promise<void>
-
-/**
- * Convert our arguments to VS Code server arguments.
+ * Convert our arguments to equivalent VS Code server arguments.
+ * Does not add any extra arguments.
  */
 export const toCodeArgs = async (args: DefaultedArgs): Promise<CodeArgs> => {
   return {
     ...args,
-    "accept-server-license-terms": true,
-    // This seems to be used to make the connection token flags optional (when
-    // set to 1.63) but we have always included them.
-    compatibility: "1.64",
     /** Type casting. */
     help: !!args.help,
     version: !!args.version,

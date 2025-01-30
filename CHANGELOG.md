@@ -22,11 +22,190 @@ Code v99.99.999
 
 ## Unreleased
 
+## [4.96.4](https://github.com/coder/code-server/releases/tag/v4.96.4) - 2025-01-20
+
+Code v1.96.4
+
+### Changed
+
+- Update to Code 1.96.4.
+
+## [4.96.2](https://github.com/coder/code-server/releases/tag/v4.96.2) - 2024-12-20
+
+Code v1.96.2
+
+### Changed
+
+- Update to Code 1.96.2.
+
+## [4.96.1](https://github.com/coder/code-server/releases/tag/v4.96.1) - 2024-12-18
+
+Code v1.96.1
+
+### Added
+
+- Dark color scheme for login and error pages.
+
+### Changed
+
+- Update to Code 1.96.1.
+
+## [4.95.3](https://github.com/coder/code-server/releases/tag/v4.95.3) - 2024-11-18
+
+Code v1.95.3
+
+### Changed
+
+- Update to Code 1.95.3.
+
+## [4.95.2](https://github.com/coder/code-server/releases/tag/v4.95.2) - 2024-11-12
+
+Code v1.95.2
+
+### Changed
+
+- Update to Code 1.95.2.
+
+## [4.95.1](https://github.com/coder/code-server/releases/tag/v4.95.1) - 2024-11-06
+
+Code v1.95.1
+
+### Changed
+
+- Update to Code 1.95.1.
+
+## [4.93.1](https://github.com/coder/code-server/releases/tag/v4.93.1) - 2024-09-23
+
+Code v1.93.1
+
+### Changed
+
+- Updated to Code 1.93.1.
+
+### Added
+
+- Added `--abs-proxy-base-path` flag for when code-server is not at the root.
+
+## [4.92.2](https://github.com/coder/code-server/releases/tag/v4.92.2) - 2024-08-19
+
+Code v1.92.2
+
+### Breaking changes
+
+- Dropped a patch that changed the compile target from es2022 to es2020 because
+  it no longer works with the way VS Code uses static properties. This may break
+  older browsers, so those browsers will either have to be updated or use an
+  older version of code-server.
+
+### Changed
+
+- Updated to Code 1.92.2.
+
+## [4.91.0](https://github.com/coder/code-server/releases/tag/v4.91.0) - 2024-07-10
+
+Code v1.91.0
+
+### Changed
+
+- Updated to Code 1.91.0.
+
+## [4.90.3](https://github.com/coder/code-server/releases/tag/v4.90.3) - 2024-06-21
+
+Code v1.90.2
+
+### Changed
+
+- Updated to Code 1.90.2.
+
+### Fixed
+
+- When the log gets rotated it will no longer incorrectly be moved to a new
+  directory created in the current working directory named with a date.
+  Instead, the file itself is prepended with the date and kept in the same
+  directory, as originally intended.
+
+## [4.90.2](https://github.com/coder/code-server/releases/tag/v4.90.2) - 2024-06-14
+
+Code v1.90.1
+
+### Changed
+
+- Updated to Code 1.90.1.
+
+## [4.90.1](https://github.com/coder/code-server/releases/tag/v4.90.1) - 2024-06-12
+
+Code v1.90.0
+
+### Fixed
+
+- Cache a call to get CPU information used in telemetry that could result in a
+  lack responsiveness if it was particularly slow.
+
+## [4.90.0](https://github.com/coder/code-server/releases/tag/v4.90.0) - 2024-06-11
+
+Code v1.90.0
+
+### Changed
+
+- Updated to Code 1.90.0.
+- Updated Node to 20.11.1.
+
+### Added
+
+- Send contents to the clipboard in the integrated terminal by piping to
+  `code-server --stdin-to-clipboard` or `code-server -c`.
+
+  You may want to make this an alias:
+
+  ```
+  alias xclip="code-server --stdin-to-clipboard"
+  echo -n "hello world" | xclip
+  ```
+
+## [4.89.1](https://github.com/coder/code-server/releases/tag/v4.89.1) - 2024-04-14
+
+Code v1.89.1
+
+### Changed
+
+- Updated to Code 1.89.1.
+
+## [4.89.0](https://github.com/coder/code-server/releases/tag/v4.89.0) - 2024-04-08
+
+Code v1.89.0
+
+### Changed
+
+- Updated to Code 1.89.0.
+
+## [4.23.1](https://github.com/coder/code-server/releases/tag/v4.23.1) - 2024-04-15
+
+Code v1.88.1
+
+### Changed
+
+- Updated to Code 1.88.1.
+
+## [4.23.0](https://github.com/coder/code-server/releases/tag/v4.23.0) - 2024-04-08
+
+Code v1.88.0
+
+### Changed
+
+- Updated to Code 1.88.0.
+- Updated Node to 18.18.2.
+
+### Fixed
+
+- Fix masking the exit code when failing to install extensions on the command
+  line outside the integrated terminal. Installing extensions inside the
+  integrated terminal still masks the exit code and is an upstream bug.
+
 ## [4.22.1](https://github.com/coder/code-server/releases/tag/v4.22.1) - 2024-03-14
 
 Code v1.87.2
 
-## Changed
+### Changed
 
 - Updated to Code 1.87.2.
 - Enable keep-alive for proxy agent.
@@ -35,7 +214,7 @@ Code v1.87.2
 
 Code v1.87.0
 
-## Changed
+### Changed
 
 - Updated to Code 1.87.0.
 
@@ -43,7 +222,7 @@ Code v1.87.0
 
 Code v1.86.2
 
-## Changed
+### Changed
 
 - Updated to Code 1.86.2.
 
@@ -51,12 +230,12 @@ Code v1.86.2
 
 Code v1.86.1
 
-## Changed
+### Changed
 
 - Updated to Code 1.86.1.
 - Updated to Node 18.17.1.
 
-## Added
+### Added
 
 - Docker images for Fedora and openSUSE.
 
@@ -64,7 +243,7 @@ Code v1.86.1
 
 Code v1.86.0
 
-## Changed
+### Changed
 
 - Updated to Code 1.86.0.
 
@@ -72,11 +251,11 @@ Code v1.86.0
 
 Code v1.85.2
 
-## Changed
+### Changed
 
 - Updated to Code 1.85.2.
 
-## Fixed
+### Fixed
 
 - Query variables are no longer double-encoded when going over the path proxy.
 

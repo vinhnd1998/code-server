@@ -20,9 +20,7 @@
   - [Proxying to a Vue app](#proxying-to-a-vue-app)
   - [Proxying to an Angular app](#proxying-to-an-angular-app)
   - [Proxying to a Svelte app](#proxying-to-a-svelte-app)
-- [SSH into code-server on VS Code](#ssh-into-code-server-on-vs-code)
-  - [Option 1: cloudflared tunnel](#option-1-cloudflared-tunnel)
-  - [Option 2: ngrok tunnel](#option-2-ngrok-tunnel)
+  - [Prefixing `/absproxy/<port>` with a path](#prefixing-absproxyport-with-a-path)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 <!-- prettier-ignore-end -->
@@ -436,92 +434,11 @@ const config = {
 
 For additional context, see [this Github Issue](https://github.com/sveltejs/kit/issues/2958)
 
-## SSH into code-server on VS Code
+### Prefixing `/absproxy/<port>` with a path
 
-[![SSH](https://img.shields.io/badge/SSH-363636?style=for-the-badge&logo=GNU+Bash&logoColor=ffffff)](https://ohmyz.sh/) [![Terminal](https://img.shields.io/badge/Terminal-2E2E2E?style=for-the-badge&logo=Windows+Terminal&logoColor=ffffff)](https://img.shields.io/badge/Terminal-2E2E2E?style=for-the-badge&logo=Windows+Terminal&logoColor=ffffff) [![Visual Studio Code](https://img.shields.io/badge/Visual_Studio_Code-007ACC?style=for-the-badge&logo=Visual+Studio+Code&logoColor=ffffff)](vscode:extension/ms-vscode-remote.remote-ssh)
+This is a case where you need to serve an application via `absproxy` as explained above while serving `codeserver` itself from a path other than the root in your domain.
 
-Follow these steps where code-server is running:
+For example: `http://my-code-server.com/user/123/workspace/my-app`. To achieve this result:
 
-1. Install `openssh-server`, `wget`, and `unzip`.
-
-```bash
-# example for Debian and Ubuntu operating systems
-sudo apt update
-sudo apt install wget unzip openssh-server
-```
-
-2. Start the SSH server and set the password for your user, if you haven't already. If you use [deploy-code-server](https://github.com/coder/deploy-code-server),
-
-```bash
-sudo service ssh start
-sudo passwd {user} # replace user with your code-server user
-```
-
-### Option 1: cloudflared tunnel
-
-[![Cloudflared](https://img.shields.io/badge/Cloudflared-E4863B?style=for-the-badge&logo=cloudflare&logoColor=ffffff)](https://github.com/cloudflare/cloudflared)
-
-1.  Install [cloudflared](https://github.com/cloudflare/cloudflared#installing-cloudflared) on your local computer and remote server
-2.  Then go to `~/.ssh/config` and add the following on your local computer:
-
-```shell
-Host *.trycloudflare.com
-HostName %h
-User user
-Port 22
-ProxyCommand "cloudflared location" access ssh --hostname %h
-```
-
-3. Run `cloudflared tunnel --url ssh://localhost:22` on the remote server
-
-4. Finally on VS Code or any IDE that supports SSH, run `ssh user@https://your-link.trycloudflare.com` or `ssh user@your-link.trycloudflare.com`
-
-### Option 2: ngrok tunnel
-
-[![Ngrok](https://img.shields.io/badge/Ngrok-1F1E37?style=for-the-badge&logo=ngrok&logoColor=ffffff)](https://ngrok.com/)
-
-1.  Make a new account for ngrok [here](https://dashboard.ngrok.com/login)
-
-2.  Now, get the ngrok binary with `wget` and unzip it with `unzip`:
-
-```bash
-wget "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip"
-unzip "ngrok-stable-linux-amd64.zip"
-```
-
-5.  Then, go to [dashboard.ngrok.com](https://dashboard.ngrok.com) and go to the `Your Authtoken` section.
-6.  Copy the Authtoken shown there.
-7.  Now, go to the folder where you unzipped ngrok and store the Authtoken from the ngrok Dashboard.
-
-```bash
-./ngrok authtoken YOUR_AUTHTOKEN # replace YOUR_AUTHTOKEN with the ngrok authtoken.
-```
-
-8.  Now, forward port 22, which is the SSH port with this command:
-
-```bash
-./ngrok tcp 22
-```
-
-Now, you get a screen in the terminal like this:
-
-```console
-ngrok by @inconshreveable(Ctrl+C to quit)
-
-Session Status                online
-Account                       {Your name} (Plan: Free)
-Version                       2.3.40
-Region                        United States (us)
-Web Interface                 http://127.0.0.1:4040
-Forwarding                    tcp://0.tcp.ngrok.io:19028 -> localhost:22
-```
-
-In this case, copy the forwarded link `0.tcp.ngrok.io` and remember the port number `19028`. Type this on your local Visual Studio Code:
-
-```bash
-ssh user@0.tcp.ngrok.io -p 19028
-```
-
-The port redirects you to the default SSH port 22, and you can then successfully connect to code-server by entering the password you set for the user.
-
-Note: the port and the url provided by ngrok will change each time you run it so modify as needed.
+1. Start code server with the switch `--abs-proxy-base-path=/user/123/workspace`
+2. Follow one of the instructions above for your framework.

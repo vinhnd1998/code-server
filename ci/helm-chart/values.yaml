@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: codercom/code-server
-  tag: '4.22.1'
+  tag: '4.96.4'
   pullPolicy: Always
 
 # Specifies one or more secrets to be used when pulling images from a
@@ -190,6 +190,7 @@ extraVolumeMounts: []
   #   readOnly: true
   #   existingClaim: volume-claim
   #   hostPath: ""
+  #   emptyDir: {}
 
 extraConfigmapMounts: []
   # - name: certs-configmap

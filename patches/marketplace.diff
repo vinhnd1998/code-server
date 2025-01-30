@@ -40,7 +40,7 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/webClientServer.ts
 +++ code-server/lib/vscode/src/vs/server/node/webClientServer.ts
-@@ -114,7 +114,7 @@ export class WebClientServer {
+@@ -115,7 +115,7 @@ export class WebClientServer {
  
  		this._staticRoute = `${serverRootPath}/static`;
  		this._callbackRoute = `${serverRootPath}/callback`;
@@ -49,27 +49,35 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
  	}
  
  	/**
-@@ -312,14 +312,7 @@ export class WebClientServer {
+@@ -313,14 +313,7 @@ export class WebClientServer {
  			codeServerVersion: this._productService.codeServerVersion,
  			rootEndpoint: base,
  			embedderIdentifier: 'server-distro',
--			extensionsGallery: this._webExtensionResourceUrlTemplate ? {
+-			extensionsGallery: this._webExtensionResourceUrlTemplate && this._productService.extensionsGallery ? {
 -				...this._productService.extensionsGallery,
--				'resourceUrlTemplate': this._webExtensionResourceUrlTemplate.with({
+-				resourceUrlTemplate: this._webExtensionResourceUrlTemplate.with({
 -					scheme: 'http',
 -					authority: remoteAuthority,
 -					path: `${this._webExtensionRoute}/${this._webExtensionResourceUrlTemplate.authority}${this._webExtensionResourceUrlTemplate.path}`
 -				}).toString(true)
 -			} : undefined
 +			extensionsGallery: this._productService.extensionsGallery,
- 		};
+ 		} satisfies Partial<IProductConfiguration>;
  
  		if (!this._environmentService.isBuilt) {
 Index: code-server/lib/vscode/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 +++ code-server/lib/vscode/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
-@@ -140,9 +140,9 @@ export abstract class AbstractExtensionR
+@@ -15,7 +15,6 @@ import { getServiceMachineId } from '../
+ import { IStorageService } from '../../storage/common/storage.js';
+ import { TelemetryLevel } from '../../telemetry/common/telemetry.js';
+ import { getTelemetryLevel, supportsTelemetry } from '../../telemetry/common/telemetryUtils.js';
+-import { RemoteAuthorities } from '../../../base/common/network.js';
+ import { TargetPlatform } from '../../extensions/common/extensions.js';
+ 
+ const WEB_EXTENSION_RESOURCE_END_POINT_SEGMENT = '/web-extension-resource/';
+@@ -140,9 +139,9 @@ export abstract class AbstractExtensionR
  	}
  
  	protected _isWebExtensionResourceEndPoint(uri: URI): boolean {

@@ -54,7 +54,7 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/webClientServer.ts
 +++ code-server/lib/vscode/src/vs/server/node/webClientServer.ts
-@@ -325,6 +325,7 @@ export class WebClientServer {
+@@ -326,6 +326,7 @@ export class WebClientServer {
  		const workbenchWebConfiguration = {
  			remoteAuthority,
  			serverBasePath: this._basePath,
@@ -70,12 +70,12 @@ Index: code-server/lib/vscode/src/vs/workbench/contrib/webview/browser/pre/index
  	<meta charset="UTF-8">
  
  	<meta http-equiv="Content-Security-Policy"
--		content="default-src 'none'; script-src 'sha256-bQPwjO6bLiyf6v9eDVtAI67LrfonA1w49aFkRXBy4/g=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
-+		content="default-src 'none'; script-src 'sha256-R3BsSkqy7qFbvWSmwr7WqT1eg6Sq4zSe0uIlrUQ4EKE=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
+-		content="default-src 'none'; script-src 'sha256-DXeP32g8BdMsVuVabYTmznoTH59F7M7UtV0vXemEFqc=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
++		content="default-src 'none'; script-src 'sha256-z5v/0xE4zQPgV1fazhHB/UlsTzdm39hRMk3V8Av0HI4=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
+ 
  
  	<!-- Disable pinch zooming -->
- 	<meta name="viewport"
-@@ -344,6 +344,12 @@
+@@ -349,6 +349,12 @@
  
  				const hostname = location.hostname;
  
@@ -113,8 +113,8 @@ Index: code-server/lib/vscode/src/vs/workbench/services/extensions/worker/webWor
  		<meta http-equiv="Content-Security-Policy" content="
  			default-src 'none';
  			child-src 'self' data: blob:;
--			script-src 'self' 'unsafe-eval' 'sha256-75NYUUvf+5++1WbfCZOV3PSWxBhONpaxwx+mkOFRv/Y=' https:;
-+			script-src 'self' 'unsafe-eval' 'sha256-c7vPrYRaSLDtFSrI4CuHYgBQ3a4c4x2LSm/LefSZADQ=' https:;
+-			script-src 'self' 'unsafe-eval' 'sha256-xM2KVDKIoeb8vVxk4ezEUsxdTZh5wFnKO3YmFhy9tkk=' https: http://localhost:* blob:;
++			script-src 'self' 'unsafe-eval' 'sha256-6eZXxikxkENULU0EOkVQSd4hglGixLg3Aow9psZ6u2Y=' https: http://localhost:* blob:;
  			connect-src 'self' https: wss: http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*;"/>
  	</head>
  	<body>

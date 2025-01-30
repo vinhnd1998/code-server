@@ -302,7 +302,7 @@ export class CodeServerPage {
     const to = new URL(noramlizedUrl)
 
     this.codeServer.logger.info(`navigating to ${to}`)
-    await this.page.goto(to.toString(), { waitUntil: "networkidle" })
+    await this.page.goto(to.toString())
 
     // Only reload editor if auth is not enabled. Otherwise we'll get stuck
     // reloading the login page.
@@ -553,6 +553,15 @@ export class CodeServerPage {
     await this.navigateItems(menus, '[aria-label="Application Menu"]', async (selector) => {
       await this.page.click(selector)
     })
+  }
+
+  /**
+   * Open context menu on the specified selector.
+   */
+  async openContextMenu(selector: string): Promise<void> {
+    const el = await this.page.waitForSelector(selector)
+    await el.click({ button: "right" })
+    await this.page.waitForSelector(".context-view-block")
   }
 
   /**

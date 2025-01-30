@@ -10,7 +10,7 @@ Index: code-server/lib/vscode/src/vs/base/common/network.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/base/common/network.ts
 +++ code-server/lib/vscode/src/vs/base/common/network.ts
-@@ -198,7 +198,9 @@ class RemoteAuthoritiesImpl {
+@@ -220,7 +220,9 @@ class RemoteAuthoritiesImpl {
  		return URI.from({
  			scheme: platform.isWeb ? this._preferredWebSchema : Schemas.vscodeRemoteResource,
  			authority: `${host}:${port}`,
@@ -46,18 +46,18 @@ Index: code-server/lib/vscode/src/vs/code/browser/workbench/workbench-dev.html
 +		<link rel="icon" href="{{BASE}}/_static/src/browser/media/favicon-dark-support.svg" />
 +		<link rel="alternate icon" href="{{BASE}}/_static/src/browser/media/favicon.ico" type="image/x-icon" />
 +		<link rel="manifest" href="{{VS_BASE}}/manifest.json" crossorigin="use-credentials" />
- 	</head>
+ 		<style id="vscode-css-modules" type="text/css" media="screen"></style>
  
- 	<body aria-label="">
+ 	</head>
 @@ -39,7 +39,7 @@
- 	<script src="{{WORKBENCH_WEB_BASE_URL}}/out/vs/loader.js"></script>
- 	<script src="{{WORKBENCH_WEB_BASE_URL}}/out/vs/webPackagePaths.js"></script>
+ 
+ 	<!-- Startup (do not modify order of script tags!) -->
  	<script>
 -		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location.origin).toString();
 +		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location).toString();
- 		Object.keys(self.webPackagePaths).map(function (key, index) {
- 			self.webPackagePaths[key] = `${baseUrl}/remote/web/node_modules/${key}/${self.webPackagePaths[key]}`;
- 		});
+ 		globalThis._VSCODE_FILE_ROOT = baseUrl + '/out/';
+ 	</script>
+ 	<script>
 Index: code-server/lib/vscode/src/vs/code/browser/workbench/workbench.html
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/code/browser/workbench/workbench.html
@@ -83,18 +83,18 @@ Index: code-server/lib/vscode/src/vs/code/browser/workbench/workbench.html
 +		<link rel="icon" href="{{BASE}}/_static/src/browser/media/favicon-dark-support.svg" />
 +		<link rel="alternate icon" href="{{BASE}}/_static/src/browser/media/favicon.ico" type="image/x-icon" />
 +		<link rel="manifest" href="{{VS_BASE}}/manifest.json" crossorigin="use-credentials" />
- 		<link data-name="vs/workbench/workbench.web.main" rel="stylesheet" href="{{WORKBENCH_WEB_BASE_URL}}/out/vs/workbench/workbench.web.main.css">
+ 		<link rel="stylesheet" href="{{WORKBENCH_WEB_BASE_URL}}/out/vs/code/browser/workbench/workbench.css">
  
  	</head>
-@@ -38,7 +38,7 @@
- 	<script src="{{WORKBENCH_WEB_BASE_URL}}/out/vs/loader.js"></script>
- 	<script src="{{WORKBENCH_WEB_BASE_URL}}/out/vs/webPackagePaths.js"></script>
+@@ -36,7 +36,7 @@
+ 
+ 	<!-- Startup (do not modify order of script tags!) -->
  	<script>
 -		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location.origin).toString();
 +		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location).toString();
- 		Object.keys(self.webPackagePaths).map(function (key, index) {
- 			self.webPackagePaths[key] = `${baseUrl}/node_modules/${key}/${self.webPackagePaths[key]}`;
- 		});
+ 		globalThis._VSCODE_FILE_ROOT = baseUrl + '/out/';
+ 	</script>
+ 	<script>
 Index: code-server/lib/vscode/src/vs/platform/remote/browser/browserSocketFactory.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/platform/remote/browser/browserSocketFactory.ts
@@ -111,7 +111,7 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/webClientServer.ts
 +++ code-server/lib/vscode/src/vs/server/node/webClientServer.ts
-@@ -270,16 +270,15 @@ export class WebClientServer {
+@@ -271,16 +271,15 @@ export class WebClientServer {
  			return void res.end();
  		}
  
@@ -133,42 +133,52 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
  		);
  		if (!remoteAuthority) {
  			return serveError(req, res, 400, `Bad request.`);
-@@ -306,8 +305,12 @@ export class WebClientServer {
+@@ -307,8 +306,12 @@ export class WebClientServer {
  			scopes: [['user:email'], ['repo']]
  		} : undefined;
  
 +		const base = relativeRoot(getOriginalUrl(req))
 +		const vscodeBase = relativePath(getOriginalUrl(req))
 +
- 		const productConfiguration = <Partial<IProductConfiguration>>{
+ 		const productConfiguration = {
  			codeServerVersion: this._productService.codeServerVersion,
 +			rootEndpoint: base,
  			embedderIdentifier: 'server-distro',
- 			extensionsGallery: this._webExtensionResourceUrlTemplate ? {
+ 			extensionsGallery: this._webExtensionResourceUrlTemplate && this._productService.extensionsGallery ? {
  				...this._productService.extensionsGallery,
-@@ -343,8 +346,10 @@ export class WebClientServer {
+@@ -337,7 +340,7 @@ export class WebClientServer {
+ 			folderUri: resolveWorkspaceURI(this._environmentService.args['default-folder']),
+ 			workspaceUri: resolveWorkspaceURI(this._environmentService.args['default-workspace']),
+ 			productConfiguration,
+-			callbackRoute: this._callbackRoute
++			callbackRoute: vscodeBase + this._callbackRoute
+ 		};
+ 
+ 		const cookies = cookie.parse(req.headers.cookie || '');
+@@ -354,9 +357,11 @@ export class WebClientServer {
  		const values: { [key: string]: string } = {
  			WORKBENCH_WEB_CONFIGURATION: asJSON(workbenchWebConfiguration),
  			WORKBENCH_AUTH_SESSION: authSessionInfo ? asJSON(authSessionInfo) : '',
 -			WORKBENCH_WEB_BASE_URL: this._staticRoute,
--			WORKBENCH_NLS_BASE_URL: nlsBaseUrl ? `${nlsBaseUrl}${!nlsBaseUrl.endsWith('/') ? '/' : ''}${this._productService.commit}/${this._productService.version}/` : '',
 +			WORKBENCH_WEB_BASE_URL: vscodeBase + this._staticRoute,
-+			WORKBENCH_NLS_BASE_URL: vscodeBase + (nlsBaseUrl ? `${nlsBaseUrl}${!nlsBaseUrl.endsWith('/') ? '/' : ''}${this._productService.commit}/${this._productService.version}/` : ''),
+ 			WORKBENCH_NLS_URL,
+-			WORKBENCH_NLS_FALLBACK_URL: `${this._staticRoute}/out/nls.messages.js`
++			WORKBENCH_NLS_FALLBACK_URL: `${vscodeBase}${this._staticRoute}/out/nls.messages.js`,
 +			BASE: base,
 +			VS_BASE: vscodeBase,
  		};
  
- 		if (useTestResolver) {
-@@ -371,7 +376,7 @@ export class WebClientServer {
+ 		// DEV ---------------------------------------------------------------------------------------
+@@ -393,7 +398,7 @@ export class WebClientServer {
  			'default-src \'self\';',
  			'img-src \'self\' https: data: blob:;',
  			'media-src \'self\';',
--			`script-src 'self' 'unsafe-eval' ${this._getScriptCspHashes(data).join(' ')} '${webWorkerExtensionHostIframeScriptSHA}' ${useTestResolver ? '' : `http://${remoteAuthority}`};`, // the sha is the same as in src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
-+			`script-src 'self' 'unsafe-eval' ${this._getScriptCspHashes(data).join(' ')} '${webWorkerExtensionHostIframeScriptSHA}' ${useTestResolver ? '' : ''};`, // the sha is the same as in src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+-			`script-src 'self' 'unsafe-eval' ${WORKBENCH_NLS_BASE_URL ?? ''} blob: 'nonce-1nline-m4p' ${this._getScriptCspHashes(data).join(' ')} '${webWorkerExtensionHostIframeScriptSHA}' 'sha256-/r7rqQ+yrxt57sxLuQ6AMYcy/lUpvAIzHjIJt/OeLWU=' ${useTestResolver ? '' : `http://${remoteAuthority}`};`,  // the sha is the same as in src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
++			`script-src 'self' 'unsafe-eval' ${WORKBENCH_NLS_BASE_URL ?? ''} blob: 'nonce-1nline-m4p' ${this._getScriptCspHashes(data).join(' ')} '${webWorkerExtensionHostIframeScriptSHA}' 'sha256-/r7rqQ+yrxt57sxLuQ6AMYcy/lUpvAIzHjIJt/OeLWU=' ${useTestResolver ? '' : ``};`,  // the sha is the same as in src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
  			'child-src \'self\';',
  			`frame-src 'self' https://*.vscode-cdn.net data:;`,
  			'worker-src \'self\' data: blob:;',
-@@ -444,3 +449,70 @@ export class WebClientServer {
+@@ -466,3 +471,70 @@ export class WebClientServer {
  		return void res.end(data);
  	}
  }
@@ -255,7 +265,7 @@ Index: code-server/lib/vscode/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/code/browser/workbench/workbench.ts
 +++ code-server/lib/vscode/src/vs/code/browser/workbench/workbench.ts
-@@ -304,7 +304,8 @@ class LocalStorageURLCallbackProvider ex
+@@ -317,7 +317,8 @@ class LocalStorageURLCallbackProvider ex
  			this.startListening();
  		}
  
@@ -265,7 +275,7 @@ Index: code-server/lib/vscode/src/vs/code/browser/workbench/workbench.ts
  	}
  
  	private startListening(): void {
-@@ -550,17 +551,6 @@ class WorkspaceProvider implements IWork
+@@ -563,17 +564,6 @@ class WorkspaceProvider implements IWork
  	}
  }
  
@@ -283,7 +293,7 @@ Index: code-server/lib/vscode/src/vs/code/browser/workbench/workbench.ts
  (function () {
  
  	// Find config by checking for DOM
-@@ -569,8 +559,8 @@ function readCookie(name: string): strin
+@@ -582,8 +572,8 @@ function readCookie(name: string): strin
  	if (!configElement || !configElementAttribute) {
  		throw new Error('Missing web configuration element');
  	}
@@ -298,15 +308,7 @@ Index: code-server/lib/vscode/src/vs/platform/extensionResourceLoader/common/ext
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 +++ code-server/lib/vscode/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
-@@ -16,7 +16,6 @@ import { getServiceMachineId } from 'vs/
- import { IStorageService } from 'vs/platform/storage/common/storage';
- import { TelemetryLevel } from 'vs/platform/telemetry/common/telemetry';
- import { getTelemetryLevel, supportsTelemetry } from 'vs/platform/telemetry/common/telemetryUtils';
--import { RemoteAuthorities } from 'vs/base/common/network';
- import { TargetPlatform } from 'vs/platform/extensions/common/extensions';
- 
- const WEB_EXTENSION_RESOURCE_END_POINT_SEGMENT = '/web-extension-resource/';
-@@ -99,7 +98,7 @@ export abstract class AbstractExtensionR
+@@ -98,7 +98,7 @@ export abstract class AbstractExtensionR
  					: version,
  				path: 'extension'
  			}));
