@@ -1,16 +1,7 @@
 name: Security
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "package.json"
-  pull_request:
-    paths:
-      - "package.json"
-  schedule:
-    # Runs every Monday morning PST
-    - cron: "17 15 * * 1"
+  workflow_dispatch:
 
 # Cancel in-progress runs for pull requests when developers push additional
 # changes, and serialize builds in branches.

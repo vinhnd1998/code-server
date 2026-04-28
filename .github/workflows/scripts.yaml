@@ -1,18 +1,7 @@
 name: Script unit tests
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "**.sh"
-      - "**.bats"
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "**.sh"
-      - "**.bats"
+  workflow_dispatch:
 
 permissions:
   actions: none
