@@ -42,17 +42,7 @@ There are five ways to get started:
 To install the latest build from this fork's GitHub releases, run:
 
 ```bash
-TAG=$(curl -fsSL https://api.github.com/repos/vinhnd1998/code-server/releases/latest | awk -F'"' '/"tag_name"/ {print $4; exit}')
-VERSION="${TAG#v}"
-ARCH="$(uname -m)"; case "$ARCH" in aarch64|arm64) ARCH=arm64 ;; esac
-PREFIX="${PREFIX:-$HOME/.local}"
-mkdir -p "$PREFIX/lib" "$PREFIX/bin"
-curl -fL "https://github.com/vinhnd1998/code-server/releases/download/${TAG}/code-server-${VERSION}-linux-${ARCH}.tar.gz" \
-  | tar -C "$PREFIX/lib" -xz
-rm -rf "$PREFIX/lib/code-server-${VERSION}"
-mv "$PREFIX/lib/code-server-${VERSION}-linux-${ARCH}" "$PREFIX/lib/code-server-${VERSION}"
-ln -sf "$PREFIX/lib/code-server-${VERSION}/bin/code-server" "$PREFIX/bin/code-server"
-PATH="$PREFIX/bin:$PATH" code-server --version
+curl -fsSL https://raw.githubusercontent.com/vinhnd1998/code-server/release/install-arm64.sh | bash
 ```
 
 Then add `$HOME/.local/bin` to your `PATH` (most shells already do) and run
