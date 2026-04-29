@@ -39,21 +39,28 @@ There are five ways to get started:
    devcontainers](https://github.com/coder/devcontainer-features/blob/main/src/code-server/README.md),
    if you already use devcontainers in your project.
 
-If you use the install script, you can preview what occurs during the install
-process:
+To install the latest build from this fork's GitHub releases, run:
 
 ```bash
-curl -fsSL https://code-server.dev/install.sh | sh -s -- --dry-run
+TAG=$(curl -fsSL https://api.github.com/repos/vinhnd1998/code-server/releases/latest | awk -F'"' '/"tag_name"/ {print $4; exit}')
+VERSION="${TAG#v}"
+ARCH="$(uname -m)"; case "$ARCH" in aarch64|arm64) ARCH=arm64 ;; esac
+PREFIX="${PREFIX:-$HOME/.local}"
+mkdir -p "$PREFIX/lib" "$PREFIX/bin"
+curl -fL "https://github.com/vinhnd1998/code-server/releases/download/${TAG}/code-server-${VERSION}-linux-${ARCH}.tar.gz" \
+  | tar -C "$PREFIX/lib" -xz
+rm -rf "$PREFIX/lib/code-server-${VERSION}"
+mv "$PREFIX/lib/code-server-${VERSION}-linux-${ARCH}" "$PREFIX/lib/code-server-${VERSION}"
+ln -sf "$PREFIX/lib/code-server-${VERSION}/bin/code-server" "$PREFIX/bin/code-server"
+PATH="$PREFIX/bin:$PATH" code-server --version
 ```
 
-To install, run:
+Then add `$HOME/.local/bin` to your `PATH` (most shells already do) and run
+`code-server` to start the server.
 
-```bash
-curl -fsSL https://code-server.dev/install.sh | sh
-```
-
-When done, the install script prints out instructions for running and starting
-code-server.
+> Releases currently ship Linux arm64 only (`.tar.gz`, `.deb`, `.rpm`). See the
+> [releases page](https://github.com/vinhnd1998/code-server/releases) for all
+> available assets.
 
 > **Note**
 > To manage code-server for a team on your infrastructure, see: [coder/coder](https://cdr.co/coder-github)
