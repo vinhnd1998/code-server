@@ -21,3 +21,8 @@ test/test-results
 # Quilt's internal data.
 /.pc
 /patches/*.diff~
+
+
+# AI stuffs
+.claude/
+.serena/

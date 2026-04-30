@@ -159,10 +159,10 @@ Index: code-server/lib/vscode/src/vs/platform/product/common/product.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/platform/product/common/product.ts
 +++ code-server/lib/vscode/src/vs/platform/product/common/product.ts
-@@ -58,7 +58,8 @@ else if (globalThis._VSCODE_PRODUCT_JSON
- 			resourceUrlTemplate: "https://open-vsx.org/vscode/asset/{publisher}/{name}/{version}/Microsoft.VisualStudio.Code.WebResources/{path}",
- 			controlUrl: "",
+@@ -59,7 +59,8 @@ else if (globalThis._VSCODE_PRODUCT_JSON
  			recommendationsUrl: "",
+ 			nlsBaseUrl: "https://www.vscode-unpkg.net/_lp/",
+ 			publisherUrl: "https://marketplace.visualstudio.com/publishers",
 -		})
 +		}),
 +		telemetryEndpoint: env.CS_TELEMETRY_URL || product.telemetryEndpoint || "https://v1.telemetry.coder.com/track",

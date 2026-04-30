@@ -1,18 +1,7 @@
 name: Installer integration
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "install.sh"
-      - ".github/workflows/installer.yaml"
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "install.sh"
-      - ".github/workflows/installer.yaml"
+  workflow_dispatch:
 
 # Cancel in-progress runs for pull requests when developers push
 # additional changes, and serialize builds in branches.

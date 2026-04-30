@@ -1,4 +1,4 @@
-Add Open VSX default and an env var for marketplace, fix old marketplace
+Add VS Code Marketplace default and an env var for marketplace, fix old marketplace
 
 Our old marketplace only supports `serviceUrl` but this causes the marketplace
 to be disabled entirely so this moves the template var check to fix that.
@@ -19,19 +19,20 @@ Index: code-server/lib/vscode/src/vs/platform/product/common/product.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/platform/product/common/product.ts
 +++ code-server/lib/vscode/src/vs/platform/product/common/product.ts
-@@ -49,6 +49,17 @@ else if (globalThis._VSCODE_PRODUCT_JSON
+@@ -49,6 +49,18 @@ else if (globalThis._VSCODE_PRODUCT_JSON
  			version: pkg.version
  		});
  	}
 +
 +	Object.assign(product, {
 +		extensionsGallery: env.EXTENSIONS_GALLERY ? JSON.parse(env.EXTENSIONS_GALLERY) : (product.extensionsGallery || {
-+			serviceUrl: "https://open-vsx.org/vscode/gallery",
-+			itemUrl: "https://open-vsx.org/vscode/item",
-+			extensionUrlTemplate: "https://open-vsx.org/vscode/gallery/{publisher}/{name}/latest",
-+			resourceUrlTemplate: "https://open-vsx.org/vscode/asset/{publisher}/{name}/{version}/Microsoft.VisualStudio.Code.WebResources/{path}",
++			serviceUrl: "https://marketplace.visualstudio.com/_apis/public/gallery",
++			itemUrl: "https://marketplace.visualstudio.com/items",
++			cacheUrl: "https://vscode.blob.core.windows.net/gallery/index",
 +			controlUrl: "",
 +			recommendationsUrl: "",
++			nlsBaseUrl: "https://www.vscode-unpkg.net/_lp/",
++			publisherUrl: "https://marketplace.visualstudio.com/publishers",
 +		})
 +	});
  }

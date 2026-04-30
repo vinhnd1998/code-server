@@ -39,21 +39,18 @@ There are five ways to get started:
    devcontainers](https://github.com/coder/devcontainer-features/blob/main/src/code-server/README.md),
    if you already use devcontainers in your project.
 
-If you use the install script, you can preview what occurs during the install
-process:
+To install the latest build from this fork's GitHub releases, run:
 
 ```bash
-curl -fsSL https://code-server.dev/install.sh | sh -s -- --dry-run
+curl -fsSL https://raw.githubusercontent.com/vinhnd1998/code-server/release/install-arm64.sh | bash
 ```
 
-To install, run:
+Then add `$HOME/.local/bin` to your `PATH` (most shells already do) and run
+`code-server` to start the server.
 
-```bash
-curl -fsSL https://code-server.dev/install.sh | sh
-```
-
-When done, the install script prints out instructions for running and starting
-code-server.
+> Releases currently ship Linux arm64 only (`.tar.gz`, `.deb`, `.rpm`). See the
+> [releases page](https://github.com/vinhnd1998/code-server/releases) for all
+> available assets.
 
 > **Note**
 > To manage code-server for a team on your infrastructure, see: [coder/coder](https://cdr.co/coder-github)

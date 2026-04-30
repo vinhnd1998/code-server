@@ -1,27 +1,6 @@
 name: Trivy Nightly Docker Scan
 
 on:
-  # Run scans if the workflow is modified, in order to test the
-  # workflow itself. This results in some spurious notifications,
-  # but seems okay for testing.
-  pull_request:
-    branches:
-      - main
-    paths:
-      - .github/workflows/trivy-docker.yaml
-
-  # Run scans against master whenever changes are merged.
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/trivy-docker.yaml
-
-  schedule:
-    # Run at 10:15 am UTC (3:15am PT/5:15am CT)
-    # Run at 0 minutes 0 hours of every day.
-    - cron: "15 10 * * *"
-
   workflow_dispatch:
 
 permissions:

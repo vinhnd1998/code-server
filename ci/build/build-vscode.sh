@@ -93,6 +93,7 @@ main() {
     "tipsAndTricksUrl": "https://go.microsoft.com/fwlink/?linkid=852118",
     "newsletterSignupUrl": "https://www.research.net/r/vsc-newsletter",
     "linkProtectionTrustedDomains": [
+      "https://marketplace.visualstudio.com",
       "https://open-vsx.org"
     ],
     "trustedExtensionAuthAccess": [
